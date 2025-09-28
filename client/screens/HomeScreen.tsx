@@ -14,7 +14,7 @@ export default function HomeScreen({ navigation }: any) {
   return (
     <View className="flex-1 bg-background p-safe justify-center items-center">
       <Text className="text-title font-bold text-gray-800 mb-6">
-        欢迎回来！
+        Welcome back!
       </Text>
 
       <Pressable
@@ -22,7 +22,7 @@ export default function HomeScreen({ navigation }: any) {
         onPress={handleLogout}
       >
         <Text className="text-subtitle text-white font-semibold text-center">
-          退出登录
+          Logout
         </Text>
       </Pressable>
     </View>

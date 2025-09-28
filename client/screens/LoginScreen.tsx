@@ -8,6 +8,7 @@ export default function LoginScreen({ navigation }: any) {
 
   const handleLogin = async () => {
     try {
+      //FIXME: replace with real api call
       const response = await fetch("http://localhost/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -15,7 +16,7 @@ export default function LoginScreen({ navigation }: any) {
       });
 
       if (!response.ok) {
-        Alert.alert("登录失败", "请检查用户名或密码");
+        Alert.alert("Login failed", "Please check the username or password.");
         return;
       }
 
@@ -27,25 +28,25 @@ export default function LoginScreen({ navigation }: any) {
         routes: [{ name: "Home" }],
       });
     } catch (error) {
-      Alert.alert("错误", "无法连接服务器");
+      Alert.alert("Error,", "Failed to connect to the server.");
     }
   };
 
   return (
     <View className="flex-1 bg-background p-safe justify-center items-center">
       <Text className="text-title font-bold text-gray-800 mb-8">
-        家庭提醒登录
+        KinConnect Login
       </Text>
 
       <TextInput
         className="w-4/5 mb-4 px-4 py-3 border border-gray-300 rounded-xl text-body bg-white"
-        placeholder="用户名"
+        placeholder="username"
         value={username}
         onChangeText={setUsername}
       />
       <TextInput
         className="w-4/5 mb-6 px-4 py-3 border border-gray-300 rounded-xl text-body bg-white"
-        placeholder="密码"
+        placeholder="password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -56,7 +57,7 @@ export default function LoginScreen({ navigation }: any) {
         onPress={handleLogin}
       >
         <Text className="text-subtitle text-white font-semibold text-center">
-          登录
+          Login
         </Text>
       </Pressable>
     </View>
