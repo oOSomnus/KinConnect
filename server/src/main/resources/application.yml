@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: KinConnect
+  datasource:
+    url: jdbc:sqlite:data/kindb.sqlite?foreign_keys=on
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+
