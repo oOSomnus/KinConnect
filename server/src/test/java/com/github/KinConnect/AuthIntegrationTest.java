@@ -34,7 +34,7 @@ public class AuthIntegrationTest {
 
     @Test
     void duplicate_register_shouldReturn409() {
-        String url = "http://localhost:" + port + "/auth/register?email=test@test.com&username=test&password=qwerty123456";
+        String url = "http://localhost:" + port + "/auth/register?email=test@test.com&username=test2&password=poiuyt123456";
         ResponseEntity<Response> responseEntity =
                 restTemplate.postForEntity(url, null, Response.class);
 
