@@ -10,7 +10,9 @@ jobs:
     defaults:
       run:
         working-directory: server
-
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
