@@ -3,6 +3,9 @@ package com.github.KinConnect.repositories;
 import com.github.KinConnect.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+/**
+ * @author yihangz
+ */
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmail(String email);
 

@@ -20,6 +20,7 @@ paths:
               required:
                 - email
                 - password
+                - username
               properties:
                 email:
                   type: string
@@ -29,6 +30,9 @@ paths:
                   type: string
                   format: password
                   example: myStrongPassword123
+                username:
+                  type: string
+                  example: oosomnus
       responses:
         '201':
           description: 注册成功，验证邮件已发送
