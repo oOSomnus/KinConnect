@@ -1,4 +1,4 @@
-package com.github.KinConnect.Repositories;
+package com.github.KinConnect.repositories;
 
 import com.github.KinConnect.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,7 +1,7 @@
 package com.github.KinConnect.services;
 
-import com.github.KinConnect.Repositories.UserRepository;
 import com.github.KinConnect.entities.User;
+import com.github.KinConnect.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
