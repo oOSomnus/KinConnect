@@ -124,10 +124,6 @@ paths:
                     type: string
                     description: JWT 令牌
                     example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-                  expiresIn:
-                    type: integer
-                    description: Token 有效期（秒）
-                    example: 3600
         '401':
           description: 邮箱或密码错误
         '403':

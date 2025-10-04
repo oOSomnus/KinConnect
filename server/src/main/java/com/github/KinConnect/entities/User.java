@@ -30,15 +30,21 @@ public class User {
     private String email;
     @Column(nullable = false)
     private String password;
-    private Boolean isOld;
+
+    @Builder.Default
+//    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    private Boolean isOld = false;
 
     @ManyToOne
     @JoinColumn(name = "guardian_id")
     private User guardian;
 
+    @Builder.Default
     @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<User> olds = new ArrayList<>();
 
-    private Boolean isVerified;
+    @Builder.Default
+//    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    private Boolean isVerified = false;
     private String code;
 }

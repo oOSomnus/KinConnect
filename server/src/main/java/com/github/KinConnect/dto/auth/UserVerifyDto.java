@@ -1,4 +1,4 @@
-package com.github.KinConnect.dto;
+package com.github.KinConnect.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-
-public class UserLoginDto {
+public class UserVerifyDto {
+    private String code;
     private String email;
-    private String password;
 }
