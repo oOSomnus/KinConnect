@@ -5,6 +5,7 @@ import com.github.KinConnect.dto.auth.UserLoginDto;
 import com.github.KinConnect.dto.auth.UserLoginResponse;
 import com.github.KinConnect.dto.auth.UserRegisterDto;
 import com.github.KinConnect.dto.auth.UserVerifyDto;
+import com.github.KinConnect.exception.AppException;
 import com.github.KinConnect.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,9 +31,9 @@ public class AuthController {
             // register the user and send the verification code
             userService.newUser(userRegisterDto.getEmail(), userRegisterDto.getUsername(), userRegisterDto.getPassword());
             return ResponseEntity.status(HttpStatus.CREATED).body(Response.builder().code(201).message("Registration successful").build());
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Response.builder().code(400).message("Registration failed").build());
+        } catch (AppException e) {
+            System.out.println(e.getLogMsg());
+            return ResponseEntity.status(e.getCode()).body(Response.builder().code(400).message(e.getDisplayMsg()).build());
         }
     }
 
@@ -42,6 +43,9 @@ public class AuthController {
             userService.verifyUser(userVerifyDto.getEmail(), userVerifyDto.getCode());
             return ResponseEntity.status(HttpStatus.CREATED).body(Response.builder().code(201).message("Verification successful").build());
 
+        } catch (AppException e) {
+            System.out.println(e.getLogMsg());
+            return ResponseEntity.status(e.getCode()).body(Response.builder().code(e.getCode()).message(e.getDisplayMsg()).build());
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Response.builder().code(400).message(e.getMessage()).build());

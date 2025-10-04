@@ -98,7 +98,7 @@ public class AuthIntegrationTest {
 
         ResponseEntity<Response> dupRegisterResponseEntity =
                 restTemplate.postForEntity(registerUrl, registerDto, Response.class);
-        assertThat(dupRegisterResponseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(dupRegisterResponseEntity.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
 
     }
 
@@ -114,7 +114,7 @@ public class AuthIntegrationTest {
         ResponseEntity<Response> response =
                 restTemplate.postForEntity(url, dto, Response.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
