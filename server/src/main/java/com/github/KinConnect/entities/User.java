@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,15 +31,22 @@ public class User {
     private String email;
     @Column(nullable = false)
     private String password;
-    private Boolean isOld;
+
+    @Builder.Default
+    private Boolean isOld = false;
 
     @ManyToOne
     @JoinColumn(name = "guardian_id")
     private User guardian;
 
+    @Builder.Default
     @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<User> olds = new ArrayList<>();
 
-    private Boolean isVerified;
+    @Builder.Default
+    private Boolean isVerified = false;
     private String code;
+
+    @Column(name = "code_expiration")
+    private LocalDateTime codeExpiration;
 }

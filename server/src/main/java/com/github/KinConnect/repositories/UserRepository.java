@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmail(String email);
-
 //    // 根据用户名查找
 //    User findByName(String name);
 //

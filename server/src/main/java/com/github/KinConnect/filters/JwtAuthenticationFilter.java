@@ -27,6 +27,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
     }
 
+    // permit url starts w/ auth
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/auth/");
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -47,11 +54,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String email = jwtService.extractEmail(token);
             String username = jwtService.extractUsername(token);
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 if (jwtService.validateToken(token, username)) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
-                                    new AuthenticatedUser(userId, email, username),
+                                    new AuthenticatedUser(Long.parseLong(userId), email, username),
                                     null,
                                     Collections.emptyList() // no role
                             );
@@ -68,11 +75,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         filterChain.doFilter(request, response);
-
     }
 
     // simple user record class
-    public record AuthenticatedUser(String userId, String email,
+    public record AuthenticatedUser(Long userId, String email,
                                     String username) {
     }
 }

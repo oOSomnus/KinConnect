@@ -124,13 +124,51 @@ paths:
                     type: string
                     description: JWT 令牌
                     example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-                  expiresIn:
-                    type: integer
-                    description: Token 有效期（秒）
-                    example: 3600
         '401':
           description: 邮箱或密码错误
         '403':
           description: 邮箱未验证
         '404':
           description: 邮箱未注册
+  /user/switch-role:
+    post:
+      summary: 用户切换角色
+      description: 切换现有角色 (0/A)
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '201':
+          description: 切换成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: "切换成功"
+                  data:
+                    type: object
+        '400':
+          description: 切换失败
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "切换失败"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
