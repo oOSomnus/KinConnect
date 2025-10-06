@@ -139,13 +139,14 @@ export default function RegistrationScreen({ navigation }: any) {
       />
 
       <View className="w-4/5 mb-6 flex-row">
-        <TextInput
-          className="flex-1 mr-2 px-4 py-3 border border-gray-300 rounded-xl text-body bg-white"
-          placeholder="verification code"
-          value={verificationCode}
-          onChangeText={setVerificationCode}
-          keyboardType="number-pad"
-        />
+                <TextInput
+                  className="flex-1 mr-2 px-4 py-3 border border-gray-300 rounded-xl text-body bg-white"
+                  placeholder="verification code"
+                  value={verificationCode}
+                  onChangeText={setVerificationCode}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
         <Pressable
           className="bg-secondary px-6 py-3 rounded-xl"
           onPress={handleSendVerification}
