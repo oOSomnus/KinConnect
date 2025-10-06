@@ -8,11 +8,13 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import LoginScreen from "./screens/LoginScreen";
 import HomeScreen from "./screens/HomeScreen";
+import RegistrationScreen from "./screens/RegistrationScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  
   useEffect(() => {
     const checkLogin = async () => {
       const token = await AsyncStorage.getItem("jwt");
@@ -20,23 +22,28 @@ export default function App() {
     };
     checkLogin();
   }, []);
+
   if (isLoggedIn === null) {
     return null; // loading page is an option
   }
   return (
-    // <View style={styles.container}>
     <NavigationContainer>
-      <Stack.Navigator>
-        {isLoggedIn ? (
-          // TODO: home page
-          <Stack.Screen name="Home" component={HomeScreen} />
-        ) : (
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ headerShown: false }}
-          />
-        )}
+      <Stack.Navigator initialRouteName={isLoggedIn ? "Home" : "Login"}>
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Register"
+          component={RegistrationScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="Home" 
+          component={HomeScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,27 +1,40 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Pressable, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function LoginScreen({ navigation }: any) {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
-      //FIXME: replace with real api call
-      const response = await fetch("http://localhost/login", {
+      const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({
+          email: email,
+          password: password
+        }),
       });
 
       if (!response.ok) {
-        Alert.alert("Login failed", "Please check the username or password.");
+        const data = await response.json();
+        
+        if (response.status === 401) {
+          Alert.alert("Login Failed", "Invalid email or password. Please check your credentials and try again.");
+        } else if (response.status === 403) {
+          Alert.alert("Email Not Verified", "Please verify your email address before logging in. Check your inbox for verification instructions.");
+        } else if (response.status === 404) {
+          Alert.alert("Account Not Found", "No account found with this email address. Please register first or check your email.");
+        } else {
+          Alert.alert("Login Failed", data.message || "Please try again.");
+        }
         return;
       }
 
       const data = await response.json();
-      await AsyncStorage.setItem("jwt", data.token);
+      await AsyncStorage.setItem("jwt", data.data.token);
 
       navigation.reset({
         index: 0,
@@ -40,9 +53,12 @@ export default function LoginScreen({ navigation }: any) {
 
       <TextInput
         className="w-4/5 mb-4 px-4 py-3 border border-gray-300 rounded-xl text-body bg-white"
-        placeholder="username"
-        value={username}
-        onChangeText={setUsername}
+        placeholder="email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
       />
       <TextInput
         className="w-4/5 mb-6 px-4 py-3 border border-gray-300 rounded-xl text-body bg-white"
@@ -58,6 +74,15 @@ export default function LoginScreen({ navigation }: any) {
       >
         <Text className="text-subtitle text-white font-semibold text-center">
           Login
+        </Text>
+      </Pressable>
+
+      <Pressable
+        className="w-4/5 py-3"
+        onPress={() => navigation.navigate('Register')}
+      >
+        <Text className="text-body text-primary text-center">
+          Don't have an account? Sign Up
         </Text>
       </Pressable>
     </View>
