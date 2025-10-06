@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Pressable, Alert } from "react-native";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function RegistrationScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
@@ -15,12 +16,16 @@ export default function RegistrationScreen({ navigation }: any) {
       params.append('username', username);
       params.append('password', password);
 
-      const response = await fetch('http://localhost:8080/auth/register', {
+      const response = await fetch(API_ENDPOINTS.REGISTER, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: params.toString(),
+        body: JSON.stringify({
+          email: email,
+          username: username,
+          password: password
+        }),
       });
 
       const data = await response.json();
@@ -64,12 +69,15 @@ export default function RegistrationScreen({ navigation }: any) {
       params.append('email', email);
       params.append('code', verificationCode);
 
-      const response = await fetch('http://localhost:8080/auth/verify-email', {
+      const response = await fetch(API_ENDPOINTS.VERIFY_EMAIL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: params.toString(),
+        body: JSON.stringify({
+          email: email,
+          code: verificationCode
+        }),
       });
 
       const data = await response.json();
