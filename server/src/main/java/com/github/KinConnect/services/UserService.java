@@ -9,6 +9,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 /**
  * @author yihangz
  */
@@ -20,6 +23,7 @@ public class UserService {
     private final JwtService jwtService;
     private final MailService mailService;
 
+    private final Integer CODE_EXPIRATION_MIN = 10;
 
     // create new unverified user
     @Transactional
@@ -32,10 +36,11 @@ public class UserService {
             String hashedPassword = passwordEncoder.encode(password);
             String code = CodeGenerator.generateCode();
             mailService.sendHtmlMail(email, "Your KinConnect Code", getCodeHtml(code));
+            LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(CODE_EXPIRATION_MIN);
             if (user != null) {
-                userRepository.save(User.builder().id(user.getId()).email(email).password(hashedPassword).username(username).code(code).build());
+                userRepository.save(User.builder().id(user.getId()).codeExpiration(expiresAt).email(email).password(hashedPassword).username(username).code(code).build());
             } else {
-                userRepository.save(User.builder().email(email).password(hashedPassword).username(username).code(code).build());
+                userRepository.save(User.builder().codeExpiration(expiresAt).email(email).password(hashedPassword).username(username).code(code).build());
             }
         } catch (AppException e) {
             throw e;
@@ -45,12 +50,13 @@ public class UserService {
     }
 
     // verify a user
+    @Transactional
     public void verifyUser(String email, String code) {
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new AppException(404, "User not found, email: " + email, "User not found");
         }
-        if (user.getCode().equals(code)) {
+        if (user.getCode().equals(code) && user.getCodeExpiration() != null && user.getCodeExpiration().isAfter(LocalDateTime.now())) {
             user.setIsVerified(true);
             userRepository.save(user);
             return;
@@ -58,6 +64,13 @@ public class UserService {
         throw new AppException(400, "Failed to verify user", "Failed to verify user, email: " + email);
     }
 
+    /**
+     * verified user login
+     *
+     * @param email
+     * @param rawPassword
+     * @return token
+     */
     public String login(String email, String rawPassword) {
         User user = userRepository.findByEmail(email);
         if (user == null) {
@@ -87,6 +100,27 @@ public class UserService {
                   </body>
                 </html>
                 """, code);
+    }
+
+    /**
+     * Switch user role
+     *
+     * @param id userId
+     */
+    public void switchRole(long id) {
+        try {
+            Optional<User> userOptional = userRepository.findById(id);
+            if (userOptional.isEmpty()) {
+                throw new AppException(404, "User not found, Id: " + id, "User not found");
+            }
+            User user = userOptional.get();
+            user.setIsOld(!user.getIsOld());
+            userRepository.save(user);
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AppException(400, "Failed to create new user, id=" + id + e.getMessage(), "Failed to create new user");
+        }
     }
 
 }

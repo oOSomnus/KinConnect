@@ -13,7 +13,7 @@ public class UserContext {
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof JwtAuthenticationFilter.AuthenticatedUser user) {
-            String userId = user.userId();
+            Long userId = user.userId();
             String email = user.email();
             String username = user.username();
             return new UserInfo(userId, username, email);
@@ -21,6 +21,6 @@ public class UserContext {
         return null;
     }
 
-    public record UserInfo(String id, String name, String emails) {
+    public record UserInfo(Long id, String name, String emails) {
     }
 }

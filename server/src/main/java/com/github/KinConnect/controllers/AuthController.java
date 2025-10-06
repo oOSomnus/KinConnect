@@ -7,6 +7,7 @@ import com.github.KinConnect.dto.auth.UserRegisterDto;
 import com.github.KinConnect.dto.auth.UserVerifyDto;
 import com.github.KinConnect.exception.AppException;
 import com.github.KinConnect.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<Response> register(@RequestBody UserRegisterDto userRegisterDto) {
+    public ResponseEntity<Response> register(@Valid @RequestBody UserRegisterDto userRegisterDto) {
         try {
             // register the user and send the verification code
             userService.newUser(userRegisterDto.getEmail(), userRegisterDto.getUsername(), userRegisterDto.getPassword());
@@ -53,7 +54,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Response> verifyEmail(@RequestBody UserLoginDto userLoginDto) {
+    public ResponseEntity<Response> verifyEmail(@Valid @RequestBody UserLoginDto userLoginDto) {
         try {
             String jwtToken = userService.login(userLoginDto.getEmail(), userLoginDto.getPassword());
             return ResponseEntity.status(HttpStatus.OK).body(Response.builder().code(200).message("Login successful").data(new UserLoginResponse(jwtToken)).build());

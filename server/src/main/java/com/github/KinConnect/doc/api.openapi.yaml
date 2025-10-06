@@ -130,3 +130,45 @@ paths:
           description: 邮箱未验证
         '404':
           description: 邮箱未注册
+  /user/switch-role:
+    post:
+      summary: 用户切换角色
+      description: 切换现有角色 (0/A)
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: 切换成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "切换成功"
+                  data:
+                    type: object
+        '400':
+          description: 切换失败
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "切换失败"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

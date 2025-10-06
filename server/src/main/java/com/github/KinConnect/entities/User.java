@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,6 @@ public class User {
     private String password;
 
     @Builder.Default
-//    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isOld = false;
 
     @ManyToOne
@@ -44,7 +44,9 @@ public class User {
     private List<User> olds = new ArrayList<>();
 
     @Builder.Default
-//    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isVerified = false;
     private String code;
+
+    @Column(name = "code_expiration")
+    private LocalDateTime codeExpiration;
 }
