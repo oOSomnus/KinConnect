@@ -5,6 +5,7 @@ import com.github.KinConnect.dto.Response;
 import com.github.KinConnect.exception.AppException;
 import com.github.KinConnect.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,10 @@ public class UserController {
         } catch (AppException e) {
             System.out.println(e.getLogMsg());
             return ResponseEntity.status(e.getCode()).body(Response.builder().code(400).message(e.getDisplayMsg()).build());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.unknownError());
         }
     }
 }

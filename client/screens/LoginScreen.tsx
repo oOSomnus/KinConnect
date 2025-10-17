@@ -14,19 +14,28 @@ export default function LoginScreen({ navigation }: any) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: email,
-          password: password
+          password: password,
         }),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        
+
         if (response.status === 401) {
-          Alert.alert("Login Failed", "Invalid email or password. Please check your credentials and try again.");
+          Alert.alert(
+            "Login Failed",
+            "Invalid email or password. Please check your credentials and try again."
+          );
         } else if (response.status === 403) {
-          Alert.alert("Email Not Verified", "Please verify your email address before logging in. Check your inbox for verification instructions.");
+          Alert.alert(
+            "Email Not Verified",
+            "Please verify your email address before logging in. Check your inbox for verification instructions."
+          );
         } else if (response.status === 404) {
-          Alert.alert("Account Not Found", "No account found with this email address. Please register first or check your email.");
+          Alert.alert(
+            "Account Not Found",
+            "No account found with this email address. Please register first or check your email."
+          );
         } else {
           Alert.alert("Login Failed", data.message || "Please try again.");
         }
@@ -79,7 +88,7 @@ export default function LoginScreen({ navigation }: any) {
 
       <Pressable
         className="w-4/5 py-3"
-        onPress={() => navigation.navigate('Register')}
+        onPress={() => navigation.navigate("Register")}
       >
         <Text className="text-body text-primary text-center">
           Don't have an account? Sign Up

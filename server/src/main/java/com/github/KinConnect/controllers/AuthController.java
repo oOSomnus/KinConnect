@@ -36,11 +36,15 @@ public class AuthController {
         } catch (AppException e) {
             System.out.println(e.getLogMsg());
             return ResponseEntity.status(e.getCode()).body(Response.builder().code(400).message(e.getDisplayMsg()).build());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.unknownError());
         }
     }
 
     @PostMapping("/verify-email")
-    public ResponseEntity<Response> verifyEmail(@RequestBody UserVerifyDto userVerifyDto) {
+    public ResponseEntity<Response> verifyEmail(@Valid @RequestBody UserVerifyDto userVerifyDto) {
         try {
             userService.verifyUser(userVerifyDto.getEmail(), userVerifyDto.getCode());
             return ResponseEntity.status(HttpStatus.CREATED).body(Response.builder().code(201).message("Verification successful").build());
@@ -50,7 +54,8 @@ public class AuthController {
             return ResponseEntity.status(e.getCode()).body(Response.builder().code(e.getCode()).message(e.getDisplayMsg()).build());
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Response.builder().code(400).message(e.getMessage()).build());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.unknownError());
         }
     }
 
@@ -61,7 +66,8 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.OK).body(Response.builder().code(200).message("Login successful").data(new UserLoginResponse(jwtToken)).build());
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Response.builder().code(400).message(e.getMessage()).build());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.unknownError());
         }
     }
 }

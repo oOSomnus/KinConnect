@@ -165,10 +165,95 @@ paths:
                   message:
                     type: string
                     example: "切换失败"
+  /messages/update/{old_id}:
+    post:
+      summary: 增加/更改/删除现有消息
+      description: 根据 `client_id` 批量更新消息内容，可包括新增、修改或删除操作。
+      parameters:
+        - name: old_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 客户端唯一标识
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                msg:
+                  type: array
+                  description: 消息对象数组
+                  items:
+                    $ref: '#/components/schemas/Message'
+      responses:
+        '201':
+          description: 消息更新成功
 
+  /messages/{old_id}:
+    get:
+      summary: 获取指定客户端的消息列表
+      description: 根据 `old_id` 查询当前关联的所有消息。
+      parameters:
+        - name: old_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 客户端唯一标识
+      responses:
+        '200':
+          description: 返回消息数组
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  schemas:
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 消息唯一标识
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        execTime:
+          type: string
+          description: Cron 表达式，定义消息执行时间
+          example: "0 0 9 * * ?"
+        text:
+          type: string
+          description: 消息文本内容
+          maxLength: 500
+          example: "每日九点发送的提醒消息"
+        isOneTime:
+          type: boolean
+          description: 是否仅执行一次
+          example: true
+        sender:
+          $ref: '#/components/schemas/User'
+        receiver:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 用户唯一标识
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        name:
+          type: string
+          description: 用户名
+          example: "Han"

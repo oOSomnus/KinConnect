@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmail(String email);
+
+    boolean existsByIdAndGuardian_Id(Long oldId, Long guardianId);
+
 //    // 根据用户名查找
 //    User findByName(String name);
 //

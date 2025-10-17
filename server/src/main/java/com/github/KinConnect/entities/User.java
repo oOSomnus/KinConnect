@@ -19,7 +19,9 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "users", indexes = {
-        @Index(name = "idx_email", columnList = "email")
+        @Index(name = "idx_email", columnList = "email"),
+        @Index(name = "idx_guardian_id", columnList = "guardian_id"),
+        @Index(name = "idx_user_guardian", columnList = "id, guardian_id")
 })
 public class User {
     @Id
@@ -40,7 +42,7 @@ public class User {
     private User guardian;
 
     @Builder.Default
-    @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "guardian")
     private List<User> olds = new ArrayList<>();
 
     @Builder.Default

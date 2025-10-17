@@ -1,14 +1,14 @@
 // API Configuration
 // Automatically detects if running on device vs simulator/web
 
-import { Platform } from 'react-native';
-import { DEV_CONFIG } from './development';
+import { Platform } from "react-native";
+import { DEV_CONFIG } from "./development";
 
 // Get the correct API base URL based on environment
 const getApiBaseUrl = () => {
   if (__DEV__) {
     // Development mode
-    if (Platform.OS === 'web') {
+    if (Platform.OS === "web") {
       // Web browser - use localhost
       return `http://localhost:${DEV_CONFIG.BACKEND_PORT}`;
     } else {
@@ -17,7 +17,7 @@ const getApiBaseUrl = () => {
     }
   } else {
     // Production mode - use your deployed backend URL
-    return 'https://your-production-api.com';
+    return "https://your-production-api.com";
   }
 };
 

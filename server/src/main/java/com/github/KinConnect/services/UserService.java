@@ -123,4 +123,17 @@ public class UserService {
         }
     }
 
+    /**
+     * verify guardian has old in their list
+     *
+     * @param oldId      oldId
+     * @param guardianId guardianId
+     */
+    public boolean verifyRelation(Long oldId, Long guardianId) {
+        try {
+            return userRepository.existsByIdAndGuardian_Id(oldId, guardianId);
+        } catch (Exception e) {
+            throw new AppException(400, "Failed to verify user, old id=" + oldId.toString() + ", guardian id=" + guardianId.toString() + e.getMessage(), "Failed to verify user");
+        }
+    }
 }
