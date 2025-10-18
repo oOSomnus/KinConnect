@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "messages", indexes = {
-        @Index(name = "idx_sender", columnList = "sender_id"),
-        @Index(name = "idx_receiver", columnList = "receiver_id")
+        @Index(name = "idx_receiver_sender", columnList = "receiver_id, sender_id"),
+        @Index(name = "idx_receiver_delete", columnList = "receiver_id, is_deleted")
 })
 public class Message {
 
@@ -46,5 +46,9 @@ public class Message {
     @ManyToOne
     @JoinColumn(name = "receiver_id", nullable = false)
     private User receiver;
+
+    @Builder.Default
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean deleted = false;
 }
 

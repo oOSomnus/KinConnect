@@ -136,4 +136,22 @@ public class UserService {
             throw new AppException(400, "Failed to verify user, old id=" + oldId.toString() + ", guardian id=" + guardianId.toString() + e.getMessage(), "Failed to verify user");
         }
     }
+
+    /**
+     * get user by id
+     *
+     * @param id
+     * @return user
+     */
+    public User getUser(Long id) {
+        try {
+            Optional<User> user = userRepository.findById(id);
+            if (user.isEmpty()) {
+                throw new AppException(400, "User not found, Id: " + id, "User not found");
+            }
+            return user.get();
+        } catch (Exception e) {
+            throw new AppException(400, "Failed to get user, id=" + id.toString(), "Failed to get user");
+        }
+    }
 }

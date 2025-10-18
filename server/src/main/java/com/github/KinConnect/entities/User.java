@@ -33,22 +33,21 @@ public class User {
     private String email;
     @Column(nullable = false)
     private String password;
-
     @Builder.Default
     private Boolean isOld = false;
-
     @ManyToOne
     @JoinColumn(name = "guardian_id")
     private User guardian;
-
     @Builder.Default
     @OneToMany(mappedBy = "guardian")
     private List<User> olds = new ArrayList<>();
-
     @Builder.Default
     private Boolean isVerified = false;
     private String code;
-
     @Column(name = "code_expiration")
     private LocalDateTime codeExpiration;
+
+    public User(Long id) {
+        this.id = id;
+    }
 }
