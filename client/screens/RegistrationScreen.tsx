@@ -10,20 +10,50 @@ export default function RegistrationScreen({ navigation }: any) {
   const [isVerificationSent, setIsVerificationSent] = useState(false);
 
   const handleSendVerification = async () => {
-    try {
-      const params = new URLSearchParams();
-      params.append('email', email);
-      params.append('username', username);
-      params.append('password', password);
+    // Validate input fields before making API call
+    if (!email.trim()) {
+      Alert.alert("Missing Information", "Please enter your email address.");
+      return;
+    }
+    
+    if (!username.trim()) {
+      Alert.alert("Missing Information", "Please enter a username.");
+      return;
+    }
+    
+    if (!password.trim()) {
+      Alert.alert("Missing Information", "Please enter a password.");
+      return;
+    }
+    
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
+    
+    // Password length validation
+    if (password.length < 8) {
+      Alert.alert("Invalid Password", "Password must be at least 8 characters long.");
+      return;
+    }
+    
+    // Username length validation
+    if (username.trim().length < 3) {
+      Alert.alert("Invalid Username", "Username must be at least 3 characters long.");
+      return;
+    }
 
+    try {
       const response = await fetch(API_ENDPOINTS.REGISTER, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: email,
-          username: username,
+          email: email.trim(),
+          username: username.trim(),
           password: password
         }),
       });
@@ -64,19 +94,26 @@ export default function RegistrationScreen({ navigation }: any) {
   };
 
   const handleSubmit = async () => {
-    try {
-      const params = new URLSearchParams();
-      params.append('email', email);
-      params.append('code', verificationCode);
+    // Validate verification code before making API call
+    if (!verificationCode.trim()) {
+      Alert.alert("Missing Information", "Please enter the verification code.");
+      return;
+    }
+    
+    if (verificationCode.trim().length < 4) {
+      Alert.alert("Invalid Code", "Please enter a valid verification code.");
+      return;
+    }
 
+    try {
       const response = await fetch(API_ENDPOINTS.VERIFY_EMAIL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: email,
-          code: verificationCode
+          email: email.trim(),
+          code: verificationCode.trim()
         }),
       });
 

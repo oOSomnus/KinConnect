@@ -28,4 +28,6 @@ export const API_ENDPOINTS = {
   LOGIN: `${API_BASE_URL}/auth/login`,
   REGISTER: `${API_BASE_URL}/auth/register`,
   VERIFY_EMAIL: `${API_BASE_URL}/auth/verify-email`,
+  USER_INFO: `${API_BASE_URL}/user/info`,
+  SWITCH_ROLE: `${API_BASE_URL}/user/switch-role`,
 } as const;

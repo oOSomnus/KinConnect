@@ -9,6 +9,7 @@ import { StyleSheet, Text, View } from "react-native";
 import LoginScreen from "./screens/LoginScreen";
 import HomeScreen from "./screens/HomeScreen";
 import RegistrationScreen from "./screens/RegistrationScreen";
+import SettingsScreen from "./screens/SettingsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +43,11 @@ export default function App() {
         <Stack.Screen 
           name="Home" 
           component={HomeScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
