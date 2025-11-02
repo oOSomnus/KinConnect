@@ -2,6 +2,8 @@ package com.github.KinConnect.controllers;
 
 import com.github.KinConnect.context.UserContext;
 import com.github.KinConnect.dto.Response;
+import com.github.KinConnect.dto.user.UserInfoDto;
+import com.github.KinConnect.dto.user.UserInfoSimpleDto;
 import com.github.KinConnect.entities.User;
 import com.github.KinConnect.exception.AppException;
 import com.github.KinConnect.services.UserService;
@@ -11,6 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -36,6 +41,14 @@ public class UserController {
         }
         Long id = currentUserInfo.id();
         User user = userService.getUser(id);
-
+        User guardian = user.getGuardian();
+        List<User> olds = user.getOlds();
+        UserInfoSimpleDto guardianResult = new UserInfoSimpleDto(guardian.getId(), guardian.getUsername(), guardian.getEmail());
+        List<UserInfoSimpleDto> oldsResult = new ArrayList<>(olds.size());
+        for (User old : olds) {
+            oldsResult.add(new UserInfoSimpleDto(old.getId(), old.getUsername(), old.getEmail()));
+        }
+        UserInfoDto response = new UserInfoDto(id, user.getUsername(), user.getEmail(), user.getIsOld(), guardianResult, oldsResult, user.getIsVerified());
+        return ResponseEntity.status(200).body(Response.builder().code(200).data(response).build());
     }
 }

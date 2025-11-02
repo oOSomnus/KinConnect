@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Table(name = "messages", indexes = {
         @Index(name = "idx_receiver_sender", columnList = "receiver_id, sender_id"),
         @Index(name = "idx_receiver_delete", columnList = "receiver_id, is_deleted")

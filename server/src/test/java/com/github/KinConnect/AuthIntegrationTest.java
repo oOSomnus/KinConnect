@@ -118,7 +118,7 @@ public class AuthIntegrationTest {
     }
 
     @Test
-    void login_beforeVerification_shouldReturn400() {
+    void login_beforeVerification_shouldReturn403() {
         // 1) register a fresh user
         String registerUrl = "http://localhost:" + port + "/auth/register";
         String uname = "unverified_user";
@@ -145,7 +145,7 @@ public class AuthIntegrationTest {
 
 
         // Expect 400 BAD_REQUEST (email not verified)
-        assertThat(loginResp.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(loginResp.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
 
