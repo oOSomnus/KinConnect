@@ -8,12 +8,30 @@ export default function LoginScreen({ navigation }: any) {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
+    // Validate input fields before making API call
+    if (!email.trim()) {
+      Alert.alert("Missing Information", "Please enter your email address.");
+      return;
+    }
+    
+    if (!password.trim()) {
+      Alert.alert("Missing Information", "Please enter your password.");
+      return;
+    }
+    
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
+
     try {
       const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: email,
+          email: email.trim(),
           password: password,
         }),
       });
