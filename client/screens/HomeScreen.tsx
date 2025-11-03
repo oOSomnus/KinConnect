@@ -14,13 +14,13 @@ export default function HomeScreen({ navigation }: any) {
   return (
     <View className="flex-1 bg-background p-safe">
       {/* Header with Settings Button */}
-      <View className="flex-row items-center justify-between mb-8 mt-4">
+      <View className="flex-row items-center justify-between mb-8 mt-12 px-4">
         <Text className="text-title font-bold text-gray-800">KinConnect</Text>
         <Pressable
           onPress={() => navigation.navigate("Settings")}
-          className="p-2"
+          className="bg-gray-100 px-4 py-3 rounded-lg active:bg-gray-200"
         >
-          <Text className="text-primary text-lg font-semibold">⚙️</Text>
+          <Text className="text-gray-700 text-base font-semibold">Settings</Text>
         </Pressable>
       </View>
 

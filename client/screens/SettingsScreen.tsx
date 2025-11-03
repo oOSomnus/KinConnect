@@ -80,14 +80,7 @@ export default function SettingsScreen() {
         return;
       }
 
-      // Show success message
-      Alert.alert(
-        "Role Updated",
-        `You are now registered as an ${userInfo?.isOld ? "Adult (Guardian)" : "Elderly"} user.`,
-        [{ text: "OK" }]
-      );
-
-      // Refresh user info to show updated role
+      // Silently refresh user info to show updated role
       await fetchUserInfo();
 
     } catch (error) {
@@ -108,15 +101,15 @@ export default function SettingsScreen() {
   return (
     <View className="flex-1 bg-background p-safe">
       {/* Header */}
-      <View className="flex-row items-center justify-between mb-8 mt-4">
+      <View className="flex-row items-center justify-between mb-8 mt-12 px-4">
         <Pressable
           onPress={() => navigation.goBack()}
-          className="p-2"
+          className="bg-gray-100 px-4 py-3 rounded-lg active:bg-gray-200"
         >
-          <Text className="text-primary text-lg font-semibold">← Back</Text>
+          <Text className="text-gray-700 text-base font-semibold">← Back</Text>
         </Pressable>
         <Text className="text-title font-bold text-gray-800">Settings</Text>
-        <View className="w-12" />
+        <View className="w-20" />
       </View>
 
       {/* Role Selection Section */}
@@ -140,13 +133,22 @@ export default function SettingsScreen() {
             </View>
             
             <Pressable
-              className="bg-primary w-full py-4 rounded-xl"
+              className="bg-primary w-full py-4 rounded-xl flex-row items-center justify-center"
               onPress={handleSwitchRole}
               disabled={isLoading}
             >
-              <Text className="text-subtitle text-white font-semibold text-center">
-                Switch Role
-              </Text>
+              {isLoading ? (
+                <>
+                  <ActivityIndicator size="small" color="#FFFFFF" className="mr-2" />
+                  <Text className="text-subtitle text-white font-semibold">
+                    Switching...
+                  </Text>
+                </>
+              ) : (
+                <Text className="text-subtitle text-white font-semibold text-center">
+                  Switch Role
+                </Text>
+              )}
             </Pressable>
           </View>
         ) : (
@@ -178,13 +180,6 @@ export default function SettingsScreen() {
           </Text>
         </Pressable>
       </View>
-
-      {isLoading && (
-        <View className="absolute inset-0 bg-black bg-opacity-50 justify-center items-center">
-          <ActivityIndicator size="large" color="#FFFFFF" />
-          <Text className="text-white mt-2">Processing...</Text>
-        </View>
-      )}
     </View>
   );
 }
