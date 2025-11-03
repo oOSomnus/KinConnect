@@ -225,6 +225,62 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
 
+  /guardian/add-olds:
+    post:
+      summary: 绑定（添加）被监护老人
+      description: 将某位老人（old）绑定到当前登录的监护人账户下。请求体可通过 `oldId` 或 `oldEmail` 指定目标老人。
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required: [ oldId ]
+                  properties:
+                    oldId:
+                      type: integer
+                      format: int64
+                      description: 老人用户的唯一 ID
+                      example: 2
+                - type: object
+                  required: [ oldEmail ]
+                  properties:
+                    oldEmail:
+                      type: string
+                      format: email
+                      description: 老人用户的邮箱（系统内需已注册）
+                      example: elderlee@example.com
+              description: 通过 oldId 或 oldEmail 指定要绑定的老人
+      responses:
+        '201':
+          description: 绑定成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: "绑定成功"
+                  data:
+                    type: object
+        '400':
+          description: 请求体不合法或参数冲突（例如同时提供 oldId 与 oldEmail）
+        '401':
+          description: 未认证
+        '403':
+          description: 当前用户不是监护人角色或无权限
+        '404':
+          description: 指定的老人不存在
+        '409':
+          description: 已存在相同的绑定关系
+
 components:
   securitySchemes:
     bearerAuth:
