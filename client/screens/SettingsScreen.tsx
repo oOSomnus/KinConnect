@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Pressable, Alert, ActivityIndicator } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_ENDPOINTS } from "../config/api";
 
@@ -14,6 +14,8 @@ interface UserInfo {
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
+  const onRoleSwitch = (route.params as any)?.onRoleSwitch;
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [isLoadingUserInfo, setIsLoadingUserInfo] = useState(true);
@@ -82,6 +84,11 @@ export default function SettingsScreen() {
 
       // Silently refresh user info to show updated role
       await fetchUserInfo();
+      
+      // Notify HomeScreen to refresh immediately
+      if (onRoleSwitch) {
+        onRoleSwitch();
+      }
 
     } catch (error) {
       Alert.alert("Error", "Failed to update role. Please try again.");

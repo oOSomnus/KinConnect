@@ -30,4 +30,5 @@ export const API_ENDPOINTS = {
   VERIFY_EMAIL: `${API_BASE_URL}/auth/verify-email`,
   USER_INFO: `${API_BASE_URL}/user/info`,
   SWITCH_ROLE: `${API_BASE_URL}/user/switch-role`,
+  ADD_OLDS: `${API_BASE_URL}/guardian/add-olds`,
 } as const;

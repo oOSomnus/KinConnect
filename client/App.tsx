@@ -10,6 +10,7 @@ import LoginScreen from "./screens/LoginScreen";
 import HomeScreen from "./screens/HomeScreen";
 import RegistrationScreen from "./screens/RegistrationScreen";
 import SettingsScreen from "./screens/SettingsScreen";
+import AddOldScreen from "./screens/AddOldScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -48,6 +49,11 @@ export default function App() {
         <Stack.Screen
           name="Settings"
           component={SettingsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AddOld"
+          component={AddOldScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
