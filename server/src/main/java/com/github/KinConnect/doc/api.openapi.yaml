@@ -167,51 +167,79 @@ paths:
                     example: "切换失败"
   /messages/update/{old_id}:
     post:
-      summary: 增加/更改/删除现有消息
-      description: 根据 `client_id` 批量更新消息内容，可包括新增、修改或删除操作。
+      summary: 批量更新老人提醒
+      description: 根据 `old_id` 批量更新消息内容，可包括新增、修改或删除操作。请求体需要包含该老人的全部提醒列表，未在清单中的历史消息会被标记为删除。
+      security:
+        - bearerAuth: [ ]
       parameters:
         - name: old_id
           in: path
           required: true
           schema:
             type: string
-          description: 客户端唯一标识
+          description: 老人唯一标识
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                msg:
-                  type: array
-                  description: 消息对象数组
-                  items:
-                    $ref: '#/components/schemas/Message'
+              type: array
+              description: 老人完整提醒列表
+              items:
+                $ref: '#/components/schemas/MessageUpdate'
+            examples:
+              sampleUpdate:
+                summary: 批量更新示例
+                value:
+                  - text: "09:00 服药提醒"
+                    execTime: "0 0 9 * * ?"
+                    isOneTime: false
+                  - id: "550e8400-e29b-41d4-a716-446655440000"
+                    text: "饮水提醒"
+                    execTime: "0 */30 8-20 * * ?"
+                    isOneTime: false
       responses:
         '201':
           description: 消息更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseSimple'
+        '400':
+          description: 请求体不合法或 cron 表达式错误
+        '401':
+          description: 未认证
+        '403':
+          description: 当前用户不是该老人的监护人
+        '404':
+          description: 老人不存在
 
   /messages/{old_id}:
     get:
-      summary: 获取指定客户端的消息列表
-      description: 根据 `old_id` 查询当前关联的所有消息。
+      summary: 获取老人提醒列表
+      description: 根据 `old_id` 查询当前关联的所有消息。需要当前登录用户为该老人的监护人。
+      security:
+        - bearerAuth: [ ]
       parameters:
         - name: old_id
           in: path
           required: true
           schema:
             type: string
-          description: 客户端唯一标识
+          description: 老人唯一标识
       responses:
         '200':
-          description: 返回消息数组
+          description: 返回消息数组（封装在标准响应中）
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Message'
+                $ref: '#/components/schemas/ResponseMessageList'
+        '400':
+          description: 权限或参数错误
+        '401':
+          description: 未认证
+        '404':
+          description: 老人不存在或不属于当前监护人
 
   /user/info:
     get:
@@ -310,6 +338,29 @@ components:
           description: 是否仅执行一次
           example: true
 
+    MessageUpdate:
+      description: 批量更新消息使用的 DTO，可选地包含 `id` 以表示更新已有提醒
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 已存在消息的唯一标识，缺省表示创建新提醒
+        text:
+          type: string
+          maxLength: 500
+          description: 消息文本内容
+        execTime:
+          type: string
+          description: Cron 表达式
+        isOneTime:
+          type: boolean
+          description: 是否仅执行一次
+      required:
+        - text
+        - execTime
+        - isOneTime
+
     User:
       type: object
       description: 用户实体对象
@@ -365,3 +416,32 @@ components:
           format: email
           example: "elderlee@example.com"
 
+    ResponseSimple:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: ok
+        data:
+          nullable: true
+      required:
+        - code
+    ResponseMessageList:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Registration successful for client 3"
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+      required:
+        - code
+        - data
