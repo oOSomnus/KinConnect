@@ -23,7 +23,7 @@ public class MessageService {
 
     public List<Message> getAllMessages(Long oldId) {
         try {
-            return messageRepository.findByReceiver_Id(oldId);
+            return messageRepository.findByReceiver_IdAndDeleted(oldId, false);
         } catch (Exception e) {
             throw new AppException(400, "error finding messages by receiver id " + e.getMessage(), "error finding messages");
         }
@@ -49,7 +49,7 @@ public class MessageService {
         }
 
         // 3) 查当前库
-        List<Message> existing = messageRepository.findByReceiver_IdAndSender_Id(oldId, senderId);
+        List<Message> existing = messageRepository.findByReceiver_IdAndSender_IdAndDeleted(oldId, senderId, false);
         Map<String, Message> existMap = existing.stream()
                 .collect(Collectors.toMap(Message::getId, m -> m));
 
@@ -59,11 +59,12 @@ public class MessageService {
         for (MessageUpdateDto it : incoming) {
             if (it.getId() == null) {
                 Message m = Message.builder()
-                        .id(oldId.toString())
                         .text(it.getText())
                         .execTime(it.getExecTime())
+                        .isOneTime(it.getIsOneTime())
                         .deleted(false)
                         .sender(new User(senderId))
+                        .receiver(oldUser)
                         .build();
                 messageRepository.save(m);
             } else {

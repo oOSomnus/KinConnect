@@ -1,8 +1,13 @@
 package com.github.KinConnect.services;
 
+import com.github.KinConnect.entities.User;
+import com.github.KinConnect.exception.AppException;
+import com.github.KinConnect.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor

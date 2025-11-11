@@ -2,6 +2,7 @@ package com.github.KinConnect.controllers;
 
 import com.github.KinConnect.context.UserContext;
 import com.github.KinConnect.dto.Response;
+import com.github.KinConnect.dto.message.MessageDto;
 import com.github.KinConnect.dto.message.MessageUpdateDto;
 import com.github.KinConnect.entities.Message;
 import com.github.KinConnect.exception.AppException;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/messages")
@@ -35,12 +37,15 @@ public class MsgController {
             throw new AppException(400, "relation verification failed", "user not logged in");
         }
         List<Message> messages = messageService.getAllMessages(oldId);
+        List<MessageDto> dtoList = messages.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(Response.builder()
                         .code(200)
                         .message("Registration successful for client " + oldId)
-                        .data(messages)
+                        .data(dtoList)
                         .build());
 
     }
@@ -62,4 +67,12 @@ public class MsgController {
     }
 
 
+    private MessageDto toDto(Message message) {
+        return new MessageDto(
+                message.getId(),
+                message.getText(),
+                message.getExecTime(),
+                message.getIsOneTime()
+        );
+    }
 }
