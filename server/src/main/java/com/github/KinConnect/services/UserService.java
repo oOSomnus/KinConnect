@@ -35,7 +35,15 @@ public class UserService {
             }
             String hashedPassword = passwordEncoder.encode(password);
             String code = CodeGenerator.generateCode();
-            mailService.sendHtmlMail(email, "Your KinConnect Code", getCodeHtml(code));
+            
+            // Try to send email, but don't fail registration if email fails
+            try {
+                mailService.sendHtmlMail(email, "Your KinConnect Code", getCodeHtml(code));
+            } catch (Exception mailException) {
+                System.out.println("Warning: Failed to send verification email: " + mailException.getMessage());
+                System.out.println("Verification code for " + email + ": " + code);
+            }
+            
             LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(CODE_EXPIRATION_MIN);
             if (user != null) {
                 userRepository.save(User.builder().id(user.getId()).codeExpiration(expiresAt).email(email).password(hashedPassword).username(username).code(code).build());

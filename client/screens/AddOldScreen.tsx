@@ -3,22 +3,7 @@ import { View, Text, Pressable, TextInput, Alert, ActivityIndicator, ScrollView 
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_ENDPOINTS } from "../config/api";
-
-interface UserSimple {
-  id: number;
-  username: string;
-  email: string;
-}
-
-interface UserInfo {
-  id: number;
-  username: string;
-  email: string;
-  isOld: boolean;
-  isVerified: boolean;
-  guardian: UserSimple | null;
-  olds: UserSimple[];
-}
+import { UserInfo, UserSimple } from "../types/api";
 
 export default function AddOldScreen() {
   const navigation = useNavigation();
@@ -208,4 +193,3 @@ export default function AddOldScreen() {
     </View>
   );
 }
-

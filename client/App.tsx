@@ -11,6 +11,7 @@ import HomeScreen from "./screens/HomeScreen";
 import RegistrationScreen from "./screens/RegistrationScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import AddOldScreen from "./screens/AddOldScreen";
+import RemindersScreen from "./screens/RemindersScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -54,6 +55,11 @@ export default function App() {
         <Stack.Screen
           name="AddOld"
           component={AddOldScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Reminders"
+          component={RemindersScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

@@ -31,4 +31,7 @@ export const API_ENDPOINTS = {
   USER_INFO: `${API_BASE_URL}/user/info`,
   SWITCH_ROLE: `${API_BASE_URL}/user/switch-role`,
   ADD_OLDS: `${API_BASE_URL}/guardian/add-olds`,
-} as const;
+  MESSAGE_LIST: (oldId: number | string) => `${API_BASE_URL}/messages/${oldId}`,
+  MESSAGE_UPDATE: (oldId: number | string) =>
+    `${API_BASE_URL}/messages/update/${oldId}`,
+};

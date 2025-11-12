@@ -1,37 +1,27 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Alert, ScrollView } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_ENDPOINTS } from "../config/api";
-
-interface UserSimple {
-  id: number;
-  username: string;
-  email: string;
-}
-
-interface UserInfo {
-  id: number;
-  username: string;
-  email: string;
-  isOld: boolean;
-  isVerified: boolean;
-  guardian: UserSimple | null;
-  olds: UserSimple[];
-}
+import { UserInfo, UserSimple } from "../types/api";
 
 export default function HomeScreen({ navigation }: any) {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchUserInfo = useCallback(async () => {
+    setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem("jwt");
-      if (!token) return;
+      if (!token) {
+        navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+        return;
+      }
 
       const response = await fetch(API_ENDPOINTS.USER_INFO, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -47,14 +37,23 @@ export default function HomeScreen({ navigation }: any) {
             guardian: data.data.guardian || null,
             olds: data.data.olds || [],
           });
+        } else {
+          setUserInfo(null);
         }
+      } else if (response.status === 401) {
+        Alert.alert("Session expired", "Please log in again.");
+        await AsyncStorage.removeItem("jwt");
+        navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+      } else {
+        Alert.alert("Error", "Failed to load user information.");
       }
     } catch (error) {
-      console.error("Error fetching user info:", error);
+      Alert.alert("Error", "Could not fetch user info. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  }, [navigation]);
 
-  // Refresh user info whenever the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       fetchUserInfo();
@@ -69,13 +68,84 @@ export default function HomeScreen({ navigation }: any) {
     });
   };
 
+  const navigateToReminders = (oldUser: UserSimple) => {
+    navigation.navigate("Reminders", { oldUser });
+  };
+
+  const renderGuardianView = () => (
+    <View className="flex-1 px-4 pb-6">
+      <Text className="text-subtitle font-semibold text-gray-800 mb-2">
+        My Elderly Connections
+      </Text>
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 24 }}>
+        {userInfo?.olds?.length ? (
+          userInfo.olds.map((old) => (
+            <Pressable
+              key={old.id}
+              className="bg-white border border-gray-200 rounded-2xl p-4 mb-3 shadow-sm"
+              onPress={() => navigateToReminders(old)}
+            >
+              <Text className="text-body font-semibold text-gray-900 mb-1">
+                {old.username}
+              </Text>
+              <Text className="text-body text-gray-600 mb-2">{old.email}</Text>
+              <Text className="text-caption text-gray-500 mb-4">
+                Tap to review reminders
+              </Text>
+              <View className="bg-primary/10 rounded-lg py-2 px-3 self-start">
+                <Text className="text-primary font-semibold text-sm">
+                  Manage Reminders
+                </Text>
+              </View>
+            </Pressable>
+          ))
+        ) : (
+          <View className="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-6 items-center">
+            <Text className="text-body text-gray-600 text-center">
+              No elderly users linked yet.
+            </Text>
+            <Text className="text-body text-gray-500 text-center mt-2">
+              Tap "Elderly" above to add someone you care for.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    </View>
+  );
+
+  const renderElderView = () => (
+    <View className="flex-1 px-4 pb-6 items-center justify-center">
+      <Text className="text-subtitle text-center text-gray-700 mb-6 px-4">
+        Let your family know you're doing well.
+      </Text>
+      <Pressable
+        className="bg-green-500 w-4/5 py-12 rounded-full items-center justify-center shadow-lg"
+        onPress={() =>
+          Alert.alert("I'm OK", "Daily check-ins will be connected soon.")
+        }
+      >
+        <Text className="text-title text-white font-bold">I'm OK</Text>
+      </Pressable>
+
+      {userInfo?.guardian && (
+        <View className="mt-10 w-full bg-white border border-gray-200 rounded-2xl p-4">
+          <Text className="text-body text-gray-500 mb-2">Guardian</Text>
+          <Text className="text-subtitle font-semibold text-gray-900">
+            {userInfo.guardian.username}
+          </Text>
+          <Text className="text-body text-gray-600">
+            {userInfo.guardian.email}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+
   return (
     <View className="flex-1 bg-background p-safe">
-      {/* Header with Settings and Add Old Button */}
       <View className="flex-row items-center justify-between mb-8 mt-12 px-4">
         <Text className="text-title font-bold text-gray-800">KinConnect</Text>
         <View className="flex-row items-center gap-2">
-          {/* Show Add Old button only for Adult (Guardian) users */}
           {userInfo && !userInfo.isOld && (
             <Pressable
               onPress={() => navigation.navigate("AddOld")}
@@ -85,7 +155,9 @@ export default function HomeScreen({ navigation }: any) {
             </Pressable>
           )}
           <Pressable
-            onPress={() => navigation.navigate("Settings", { onRoleSwitch: fetchUserInfo })}
+            onPress={() =>
+              navigation.navigate("Settings", { onRoleSwitch: fetchUserInfo })
+            }
             className="bg-gray-100 p-3 rounded-lg active:bg-gray-200 items-center justify-center"
           >
             <Text className="text-gray-700 text-xl">⚙️</Text>
@@ -93,14 +165,33 @@ export default function HomeScreen({ navigation }: any) {
         </View>
       </View>
 
-      {/* Main Content */}
-      <View className="flex-1 justify-center items-center">
-        <Text className="text-subtitle text-gray-600 mb-8 text-center px-4">
-          Welcome to your dashboard! Use the settings button to customize your experience.
-        </Text>
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-body text-gray-600">Loading dashboard...</Text>
+        </View>
+      ) : userInfo ? (
+        userInfo.isOld ? (
+          renderElderView()
+        ) : (
+          renderGuardianView()
+        )
+      ) : (
+        <View className="flex-1 items-center justify-center px-6">
+          <Text className="text-body text-center text-gray-600 mb-4">
+            We couldn't load your profile. Please try again later.
+          </Text>
+          <Pressable
+            className="bg-primary px-5 py-3 rounded-xl"
+            onPress={fetchUserInfo}
+          >
+            <Text className="text-white font-semibold">Retry</Text>
+          </Pressable>
+        </View>
+      )}
 
+      <View className="px-4 pb-8">
         <Pressable
-          className="bg-warning w-4/5 py-4 rounded-xl"
+          className="bg-warning w-full py-4 rounded-xl"
           onPress={handleLogout}
         >
           <Text className="text-subtitle text-white font-semibold text-center">
