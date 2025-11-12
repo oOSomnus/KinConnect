@@ -259,6 +259,46 @@ paths:
         '401':
           description: 未认证
 
+  /checkin/status:
+    get:
+      summary: 获取老人当日确认状态
+      description: 返回当前登录用户（老人）的当日确认状态及最近一次确认时间。
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: 状态返回成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/CheckInStatus'
+        '401':
+          description: 未认证
+
+  /checkin/confirm:
+    post:
+      summary: 老人确认“我很好”
+      description: 老人点击按钮后调用此接口，记录当天确认时间。
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '201':
+          description: 确认成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseSimple'
+        '400':
+          description: 当前用户不是老人或未绑定监护人
+        '401':
+          description: 未认证
+
   /guardian/add-olds:
     post:
       summary: 绑定（添加）被监护老人
@@ -421,6 +461,16 @@ components:
           type: string
           format: email
           example: "elderlee@example.com"
+        checkedInToday:
+          type: boolean
+          description: 是否在当天完成确认
+          example: true
+        lastCheckInAt:
+          type: string
+          format: date-time
+          description: 最近一次确认时间
+          nullable: true
+          example: "2025-01-01T09:00:00"
 
     ResponseSimple:
       type: object
@@ -451,3 +501,22 @@ components:
       required:
         - code
         - data
+    CheckInStatus:
+      type: object
+      properties:
+        hasGuardian:
+          type: boolean
+          description: 是否已绑定监护人
+          example: true
+        checkedInToday:
+          type: boolean
+          description: 今天是否已确认
+          example: false
+        lastCheckInAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: 最近一次确认时间
+          example: "2025-01-01T09:00:00"
+        guardian:
+          $ref: '#/components/schemas/UserSimple'

@@ -43,18 +43,14 @@ public class UserController {
         User user = userService.getUser(id);
         
         // Handle guardian - only create DTO if guardian is not null
-        UserInfoSimpleDto guardianResult = null;
-        User guardian = user.getGuardian();
-        if (guardian != null) {
-            guardianResult = new UserInfoSimpleDto(guardian.getId(), guardian.getUsername(), guardian.getEmail());
-        }
+        UserInfoSimpleDto guardianResult = userService.toSimpleDto(user.getGuardian());
         
         // Handle olds - only create DTOs if olds list is not null and not empty
         List<UserInfoSimpleDto> oldsResult = new ArrayList<>();
         List<User> olds = user.getOlds();
         if (olds != null && !olds.isEmpty()) {
             for (User old : olds) {
-                oldsResult.add(new UserInfoSimpleDto(old.getId(), old.getUsername(), old.getEmail()));
+                oldsResult.add(userService.toSimpleDto(old));
             }
         }
         
@@ -69,4 +65,5 @@ public class UserController {
         );
         return ResponseEntity.status(200).body(Response.builder().code(200).data(response).build());
     }
+
 }

@@ -2,6 +2,8 @@ export interface UserSimple {
   id: number;
   username: string;
   email: string;
+  checkedInToday?: boolean;
+  lastCheckInAt?: string | null;
 }
 
 export interface UserInfo {
@@ -19,4 +21,11 @@ export interface MessageDto {
   text: string;
   execTime: string;
   isOneTime: boolean;
+}
+
+export interface CheckInStatus {
+  hasGuardian: boolean;
+  checkedInToday: boolean;
+  lastCheckInAt?: string | null;
+  guardian?: UserSimple | null;
 }

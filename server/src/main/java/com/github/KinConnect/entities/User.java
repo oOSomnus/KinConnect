@@ -46,6 +46,8 @@ public class User {
     private String code;
     @Column(name = "code_expiration")
     private LocalDateTime codeExpiration;
+    @Column(name = "last_check_in_at")
+    private LocalDateTime lastCheckInAt;
 
     public User(Long id) {
         this.id = id;

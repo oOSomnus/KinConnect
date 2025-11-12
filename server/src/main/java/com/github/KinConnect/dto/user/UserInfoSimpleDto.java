@@ -1,5 +1,11 @@
 package com.github.KinConnect.dto.user;
 
-public record UserInfoSimpleDto(Long id, String username, String email) {
+import java.time.LocalDateTime;
+
+public record UserInfoSimpleDto(Long id,
+                                String username,
+                                String email,
+                                Boolean checkedInToday,
+                                LocalDateTime lastCheckInAt) {
 }
     

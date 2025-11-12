@@ -1,5 +1,6 @@
 package com.github.KinConnect.services;
 
+import com.github.KinConnect.dto.user.UserInfoSimpleDto;
 import com.github.KinConnect.entities.User;
 import com.github.KinConnect.exception.AppException;
 import com.github.KinConnect.repositories.UserRepository;
@@ -9,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -161,5 +163,39 @@ public class UserService {
         } catch (Exception e) {
             throw new AppException(400, "Failed to get user, id=" + id.toString(), "Failed to get user");
         }
+    }
+
+    public boolean hasCheckedInToday(User user) {
+        if (user == null || user.getLastCheckInAt() == null) {
+            return false;
+        }
+        LocalDate today = LocalDate.now();
+        return user.getLastCheckInAt().toLocalDate().isEqual(today);
+    }
+
+    public UserInfoSimpleDto toSimpleDto(User user) {
+        if (user == null) {
+            return null;
+        }
+        return new UserInfoSimpleDto(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                hasCheckedInToday(user),
+                user.getLastCheckInAt()
+        );
+    }
+
+    @Transactional
+    public void confirmCheckIn(Long userId) {
+        User user = getUser(userId);
+        if (Boolean.FALSE.equals(user.getIsOld())) {
+            throw new AppException(400, "User is not an elder", "Only elderly users can confirm status");
+        }
+        if (user.getGuardian() == null) {
+            throw new AppException(400, "Guardian not bound", "Please bind a guardian first");
+        }
+        user.setLastCheckInAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 }

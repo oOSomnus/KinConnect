@@ -34,4 +34,6 @@ export const API_ENDPOINTS = {
   MESSAGE_LIST: (oldId: number | string) => `${API_BASE_URL}/messages/${oldId}`,
   MESSAGE_UPDATE: (oldId: number | string) =>
     `${API_BASE_URL}/messages/update/${oldId}`,
+  CHECKIN_STATUS: `${API_BASE_URL}/checkin/status`,
+  CHECKIN_CONFIRM: `${API_BASE_URL}/checkin/confirm`,
 };
