@@ -3,6 +3,7 @@ import { View, Text, Pressable, Alert, ScrollView } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_ENDPOINTS } from "../config/api";
+import { useLocale } from "../context/LocaleContext";
 import { CheckInStatus, MessageDto, UserInfo, UserSimple } from "../types/api";
 import { cronToSchedule } from "../utils/cron";
 
@@ -15,6 +16,7 @@ export default function HomeScreen({ navigation }: any) {
   const remindersRef = useRef<MessageDto[]>([]);
   const triggeredRef = useRef<Record<string, string>>({});
   const reminderTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { t } = useLocale();
 
   const fetchUserInfo = useCallback(async () => {
     setIsLoading(true);
@@ -48,14 +50,14 @@ export default function HomeScreen({ navigation }: any) {
           setUserInfo(null);
         }
       } else if (response.status === 401) {
-        Alert.alert("Session expired", "Please log in again.");
+        Alert.alert(t("home.alertNetworkTitle"), t("home.alertLoginBody"));
         await AsyncStorage.removeItem("jwt");
         navigation.reset({ index: 0, routes: [{ name: "Login" }] });
       } else {
-        Alert.alert("Error", "Failed to load user information.");
+        Alert.alert(t("home.alertNetworkTitle"), t("home.alertNetworkBody"));
       }
     } catch (error) {
-      Alert.alert("Error", "Could not fetch user info. Please try again.");
+      Alert.alert(t("home.alertNetworkTitle"), t("home.alertNetworkBody"));
     } finally {
       setIsLoading(false);
     }
@@ -168,8 +170,8 @@ export default function HomeScreen({ navigation }: any) {
         }
         triggeredRef.current[reminderKey] = currentMinuteStamp;
         Alert.alert(
-          "Reminder",
-          reminder.text || "Time for your scheduled check-in."
+          t("home.reminderAlertTitle"),
+          reminder.text || t("home.hero")
         );
       }
     });
@@ -211,7 +213,7 @@ export default function HomeScreen({ navigation }: any) {
   const renderGuardianView = () => (
     <View className="flex-1 px-4 pb-6">
       <Text className="text-subtitle font-semibold text-gray-800 mb-2">
-        My Elderly Connections
+        {t("home.guardianSection")}
       </Text>
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 24 }}>
         {userInfo?.olds?.length ? (
@@ -230,16 +232,19 @@ export default function HomeScreen({ navigation }: any) {
                   old.checkedInToday ? "text-green-600" : "text-red-500"
                 }`}
               >
-                {old.checkedInToday ? "Checked in today" : "Awaiting check-in"}
+                {old.checkedInToday
+                  ? t("home.statusCheckedIn")
+                  : t("home.statusPending")}
               </Text>
               {old.lastCheckInAt && (
                 <Text className="text-caption text-gray-500 mb-2">
-                  Last: {new Date(old.lastCheckInAt).toLocaleString()}
+                  {t("common.lastConfirmed")}:{" "}
+                  {new Date(old.lastCheckInAt).toLocaleString()}
                 </Text>
               )}
               <View className="bg-primary/10 rounded-lg py-2 px-3 self-start">
                 <Text className="text-primary font-semibold text-sm">
-                  Manage Reminders
+                  {t("common.manageReminders")}
                 </Text>
               </View>
             </Pressable>
@@ -247,10 +252,10 @@ export default function HomeScreen({ navigation }: any) {
         ) : (
           <View className="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-6 items-center">
             <Text className="text-body text-gray-600 text-center">
-              No elderly users linked yet.
+              {t("home.noElders")}
             </Text>
             <Text className="text-body text-gray-500 text-center mt-2">
-              Tap "Elderly" above to add someone you care for.
+              {t("home.addPrompt")}
             </Text>
           </View>
         )}
@@ -266,7 +271,7 @@ export default function HomeScreen({ navigation }: any) {
     return (
       <View className="flex-1 px-4 pb-6 items-center justify-center">
       <Text className="text-subtitle text-center text-gray-700 mb-6 px-4">
-        Let your family know you're doing well.
+        {t("home.hero")}
       </Text>
       <Pressable
         className={`w-4/5 py-12 rounded-full items-center justify-center shadow-lg ${
@@ -286,7 +291,10 @@ export default function HomeScreen({ navigation }: any) {
           try {
             const token = await AsyncStorage.getItem("jwt");
             if (!token) {
-              Alert.alert("Error", "Please log in again.");
+              Alert.alert(
+                t("home.alertNetworkTitle"),
+                t("home.alertLoginBody")
+              );
               return;
             }
             const response = await fetch(API_ENDPOINTS.CHECKIN_CONFIRM, {
@@ -296,17 +304,23 @@ export default function HomeScreen({ navigation }: any) {
               },
             });
             if (response.ok || response.status === 201) {
-              Alert.alert("Thank you!", "Status confirmed for today.");
+              Alert.alert(
+                t("home.alertThankYouTitle"),
+                t("home.alertThankYouBody")
+              );
               fetchCheckInStatus();
             } else {
               const data = await response.json().catch(() => ({}));
               Alert.alert(
-                "Unable to confirm",
-                data.message || "Please try again later."
+                t("home.alertFailTitle"),
+                data.message || t("home.alertFailBody")
               );
             }
           } catch (error) {
-            Alert.alert("Error", "Unable to reach the server.");
+            Alert.alert(
+              t("home.alertNetworkTitle"),
+              t("home.alertNetworkBody")
+            );
           } finally {
             setIsConfirming(false);
           }
@@ -315,11 +329,11 @@ export default function HomeScreen({ navigation }: any) {
         <Text className="text-title text-white font-bold">
           {hasGuardian
             ? checkedInToday
-              ? "Checked In Today"
+              ? t("home.checkedTodayButton")
               : isConfirming
-              ? "Confirming..."
-              : "I'm OK"
-            : "Bind a Guardian"}
+              ? t("home.confirming")
+              : t("home.imOk")
+            : t("home.bindGuardian")}
         </Text>
       </Pressable>
 
@@ -338,14 +352,14 @@ export default function HomeScreen({ navigation }: any) {
         }
       >
         <Text className="text-subtitle text-white font-semibold text-center">
-          View My Reminders
+          {t("home.viewReminders")}
         </Text>
       </Pressable>
 
       {checkInStatus?.lastCheckInAt && (
         <View className="mt-6 w-full bg-white border border-gray-200 rounded-2xl p-4">
           <Text className="text-body text-gray-500 mb-1">
-            Last confirmed
+            {t("home.lastConfirmed")}
           </Text>
           <Text className="text-subtitle font-semibold text-gray-900">
             {new Date(checkInStatus.lastCheckInAt).toLocaleString()}
@@ -355,7 +369,9 @@ export default function HomeScreen({ navigation }: any) {
 
       {guardianInfo && (
         <View className="mt-10 w-full bg-white border border-gray-200 rounded-2xl p-4">
-          <Text className="text-body text-gray-500 mb-2">Guardian</Text>
+          <Text className="text-body text-gray-500 mb-2">
+            {t("home.guardianCardTitle")}
+          </Text>
           <Text className="text-subtitle font-semibold text-gray-900">
             {guardianInfo.username}
           </Text>
@@ -371,14 +387,16 @@ export default function HomeScreen({ navigation }: any) {
   return (
     <View className="flex-1 bg-background p-safe">
       <View className="flex-row items-center justify-between mb-8 mt-12 px-4">
-        <Text className="text-title font-bold text-gray-800">KinConnect</Text>
+      <Text className="text-title font-bold text-gray-800">{t("home.title")}</Text>
         <View className="flex-row items-center gap-2">
           {userInfo && !userInfo.isOld && (
             <Pressable
               onPress={() => navigation.navigate("AddOld")}
               className="bg-primary px-4 py-3 rounded-lg active:bg-primary/80"
             >
-              <Text className="text-white text-base font-semibold">Elderly</Text>
+              <Text className="text-white text-base font-semibold">
+                {t("home.addOldButton")}
+              </Text>
             </Pressable>
           )}
           <Pressable
@@ -394,7 +412,7 @@ export default function HomeScreen({ navigation }: any) {
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <Text className="text-body text-gray-600">Loading dashboard...</Text>
+          <Text className="text-body text-gray-600">{t("home.loading")}</Text>
         </View>
       ) : userInfo ? (
         userInfo.isOld ? (
@@ -405,13 +423,13 @@ export default function HomeScreen({ navigation }: any) {
       ) : (
         <View className="flex-1 items-center justify-center px-6">
           <Text className="text-body text-center text-gray-600 mb-4">
-            We couldn't load your profile. Please try again later.
+            {t("home.noProfile")}
           </Text>
           <Pressable
             className="bg-primary px-5 py-3 rounded-xl"
             onPress={fetchUserInfo}
           >
-            <Text className="text-white font-semibold">Retry</Text>
+            <Text className="text-white font-semibold">{t("home.retry")}</Text>
           </Pressable>
         </View>
       )}
@@ -422,7 +440,7 @@ export default function HomeScreen({ navigation }: any) {
           onPress={handleLogout}
         >
           <Text className="text-subtitle text-white font-semibold text-center">
-            Logout
+            {t("home.logout")}
           </Text>
         </Pressable>
       </View>

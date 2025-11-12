@@ -3,6 +3,8 @@ import { View, Text, Pressable, Alert, ActivityIndicator } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_ENDPOINTS } from "../config/api";
+import { useLocale } from "../context/LocaleContext";
+import { LANGUAGE_OPTIONS } from "../i18n/translations";
 
 interface UserInfo {
   id: number;
@@ -19,6 +21,7 @@ export default function SettingsScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [isLoadingUserInfo, setIsLoadingUserInfo] = useState(true);
+  const { t, language, setLanguage } = useLocale();
 
   // Fetch user info on component mount
   useEffect(() => {
@@ -29,7 +32,7 @@ export default function SettingsScreen() {
     try {
       const token = await AsyncStorage.getItem("jwt");
       if (!token) {
-        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        Alert.alert(t("home.alertNetworkTitle"), t("home.alertLoginBody"));
         (navigation as any).reset({
           index: 0,
           routes: [{ name: "Login" }],
@@ -48,10 +51,10 @@ export default function SettingsScreen() {
         const data = await response.json();
         setUserInfo(data.data);
       } else {
-        Alert.alert("Error", "Failed to fetch user information.");
+        Alert.alert(t("home.alertNetworkTitle"), t("settings.failedUser"));
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch user information.");
+      Alert.alert(t("home.alertNetworkTitle"), t("settings.failedUser"));
     } finally {
       setIsLoadingUserInfo(false);
     }
@@ -62,7 +65,7 @@ export default function SettingsScreen() {
     try {
       const token = await AsyncStorage.getItem("jwt");
       if (!token) {
-        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        Alert.alert(t("home.alertNetworkTitle"), t("home.alertLoginBody"));
         setIsLoading(false);
         return;
       }
@@ -77,7 +80,10 @@ export default function SettingsScreen() {
 
       if (!response.ok) {
         const data = await response.json();
-        Alert.alert("Role Switch Failed", data.message || "Failed to switch role. Please try again.");
+        Alert.alert(
+          t("settings.switchRole"),
+          data.message || t("settings.switchRoleError")
+        );
         setIsLoading(false);
         return;
       }
@@ -91,7 +97,10 @@ export default function SettingsScreen() {
       }
 
     } catch (error) {
-      Alert.alert("Error", "Failed to update role. Please try again.");
+      Alert.alert(
+        t("home.alertNetworkTitle"),
+        t("settings.switchRoleError")
+      );
     } finally {
       setIsLoading(false);
     }
@@ -115,27 +124,35 @@ export default function SettingsScreen() {
         >
           <Text className="text-gray-700 text-base font-semibold">← Back</Text>
         </Pressable>
-        <Text className="text-title font-bold text-gray-800">Settings</Text>
+        <Text className="text-title font-bold text-gray-800">
+          {t("settings.title")}
+        </Text>
         <View className="w-20" />
       </View>
 
       {/* Role Selection Section */}
       <View className="mb-8">
         <Text className="text-subtitle font-semibold text-gray-800 mb-4">
-          User Role
+          {t("settings.userRole")}
         </Text>
         
         {isLoadingUserInfo ? (
           <View className="py-8 items-center">
             <ActivityIndicator size="small" color="#666" />
-            <Text className="text-body text-gray-600 mt-2">Loading user information...</Text>
+            <Text className="text-body text-gray-600 mt-2">
+              {t("settings.loadingUser")}
+            </Text>
           </View>
         ) : userInfo ? (
           <View>
             <View className="bg-gray-100 p-4 rounded-xl mb-4">
-              <Text className="text-body text-gray-600 mb-1">Current Role:</Text>
+              <Text className="text-body text-gray-600 mb-1">
+                {t("settings.userRole")}
+              </Text>
               <Text className="text-subtitle font-semibold text-gray-800">
-                {userInfo.isOld ? "Elderly" : "Adult (Guardian)"}
+                {userInfo.isOld
+                  ? t("settings.currentRoleElder")
+                  : t("settings.currentRoleGuardian")}
               </Text>
             </View>
             
@@ -148,33 +165,65 @@ export default function SettingsScreen() {
                 <>
                   <ActivityIndicator size="small" color="#FFFFFF" className="mr-2" />
                   <Text className="text-subtitle text-white font-semibold">
-                    Switching...
+                    {t("settings.switching")}
                   </Text>
                 </>
               ) : (
                 <Text className="text-subtitle text-white font-semibold text-center">
-                  Switch Role
+                  {t("settings.switchRole")}
                 </Text>
               )}
             </Pressable>
           </View>
         ) : (
           <View className="py-8 items-center">
-            <Text className="text-body text-gray-600">Failed to load user information</Text>
+            <Text className="text-body text-gray-600">
+              {t("settings.failedUser")}
+            </Text>
             <Pressable
               className="bg-primary px-4 py-2 rounded-lg mt-2"
               onPress={fetchUserInfo}
             >
-              <Text className="text-white font-semibold">Retry</Text>
+              <Text className="text-white font-semibold">{t("settings.retry")}</Text>
             </Pressable>
           </View>
         )}
       </View>
 
+      <View className="mb-8 px-1">
+        <Text className="text-subtitle font-semibold text-gray-800 mb-1">
+          {t("settings.languageTitle")}
+        </Text>
+        <Text className="text-body text-gray-500 mb-4">
+          {t("settings.languageSubtitle")}
+        </Text>
+        {LANGUAGE_OPTIONS.map((option) => {
+          const isActive = option.code === language;
+          return (
+            <Pressable
+              key={option.code}
+              className={`flex-row items-center justify-between px-4 py-3 rounded-xl mb-2 border ${
+                isActive ? "border-primary bg-primary/10" : "border-gray-200 bg-white"
+              }`}
+              onPress={() => setLanguage(option.code)}
+            >
+              <Text
+                className={`text-body font-semibold ${
+                  isActive ? "text-primary" : "text-gray-800"
+                }`}
+              >
+                {option.label}
+              </Text>
+              {isActive && <Text className="text-primary text-lg">✓</Text>}
+            </Pressable>
+          );
+        })}
+      </View>
+
       {/* Other Settings */}
       <View className="mb-8">
         <Text className="text-subtitle font-semibold text-gray-800 mb-4">
-          Account
+          {t("settings.accountTitle")}
         </Text>
         
         <Pressable
@@ -183,7 +232,7 @@ export default function SettingsScreen() {
           disabled={isLoading}
         >
           <Text className="text-subtitle text-white font-semibold text-center">
-            Logout
+            {t("settings.logout")}
           </Text>
         </Pressable>
       </View>

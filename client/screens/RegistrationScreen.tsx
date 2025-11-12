@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Pressable, Alert } from "react-native";
 import { API_ENDPOINTS } from "../config/api";
+import { useLocale } from "../context/LocaleContext";
 
 export default function RegistrationScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
@@ -8,6 +9,7 @@ export default function RegistrationScreen({ navigation }: any) {
   const [password, setPassword] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [isVerificationSent, setIsVerificationSent] = useState(false);
+  const { t } = useLocale();
 
   const handleSendVerification = async () => {
     // Validate input fields before making API call
@@ -145,12 +147,12 @@ export default function RegistrationScreen({ navigation }: any) {
   return (
     <View className="flex-1 bg-background p-safe justify-center items-center">
       <Text className="text-title font-bold text-gray-800 mb-8">
-        Create Account
+        {t("register.title")}
       </Text>
       
       <TextInput
         className="w-4/5 mb-4 px-4 py-3 border border-gray-300 rounded-xl text-body bg-white"
-        placeholder="email"
+        placeholder={t("register.emailPlaceholder")}
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -160,7 +162,7 @@ export default function RegistrationScreen({ navigation }: any) {
 
       <TextInput
         className="w-4/5 mb-4 px-4 py-3 border border-gray-300 rounded-xl text-body bg-white"
-        placeholder="username"
+        placeholder={t("register.usernamePlaceholder")}
         value={username}
         onChangeText={setUsername}
         autoCapitalize="none"
@@ -169,7 +171,7 @@ export default function RegistrationScreen({ navigation }: any) {
 
       <TextInput
         className="w-4/5 mb-4 px-4 py-3 border border-gray-300 rounded-xl text-body bg-white"
-        placeholder="password"
+        placeholder={t("register.passwordPlaceholder")}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -178,7 +180,7 @@ export default function RegistrationScreen({ navigation }: any) {
       <View className="w-4/5 mb-6 flex-row">
                 <TextInput
                   className="flex-1 mr-2 px-4 py-3 border border-gray-300 rounded-xl text-body bg-white"
-                  placeholder="verification code"
+                  placeholder={t("register.verificationPlaceholder")}
                   value={verificationCode}
                   onChangeText={setVerificationCode}
                   autoCapitalize="none"
@@ -189,7 +191,9 @@ export default function RegistrationScreen({ navigation }: any) {
           onPress={handleSendVerification}
         >
           <Text className="text-body text-white font-semibold">
-            {isVerificationSent ? 'Resend' : 'Send Verification'}
+            {isVerificationSent
+              ? t("register.resendCode")
+              : t("register.sendCode")}
           </Text>
         </Pressable>
       </View>
@@ -203,7 +207,7 @@ export default function RegistrationScreen({ navigation }: any) {
           disabled={!verificationCode}
         >
           <Text className="text-subtitle text-white font-semibold text-center">
-            Submit
+            {t("register.submit")}
           </Text>
         </Pressable>
       )}
@@ -213,7 +217,7 @@ export default function RegistrationScreen({ navigation }: any) {
         onPress={() => navigation.navigate('Login')}
       >
         <Text className="text-body text-primary text-center">
-          Already have an account? Sign In
+          {t("register.haveAccount")}
         </Text>
       </Pressable>
     </View>

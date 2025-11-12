@@ -3,16 +3,15 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import "./index.css";
 
-import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import LoginScreen from "./screens/LoginScreen";
-import HomeScreen from "./screens/HomeScreen";
-import RegistrationScreen from "./screens/RegistrationScreen";
-import SettingsScreen from "./screens/SettingsScreen";
+import { LocaleProvider } from "./context/LocaleContext";
 import AddOldScreen from "./screens/AddOldScreen";
+import HomeScreen from "./screens/HomeScreen";
+import LoginScreen from "./screens/LoginScreen";
+import RegistrationScreen from "./screens/RegistrationScreen";
 import RemindersScreen from "./screens/RemindersScreen";
+import SettingsScreen from "./screens/SettingsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -31,50 +30,43 @@ export default function App() {
     return null; // loading page is an option
   }
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-      <Stack.Navigator initialRouteName={isLoggedIn ? "Home" : "Login"}>
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Register"
-          component={RegistrationScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen 
-          name="Home" 
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Settings"
-          component={SettingsScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="AddOld"
-          component={AddOldScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Reminders"
-          component={RemindersScreen}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <LocaleProvider>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName={isLoggedIn ? "Home" : "Login"}>
+            <Stack.Screen
+              name="Login"
+              component={LoginScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Register"
+              component={RegistrationScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Settings"
+              component={SettingsScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="AddOld"
+              component={AddOldScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Reminders"
+              component={RemindersScreen}
+              options={{ headerShown: false }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </LocaleProvider>
   );
 }
-
-// const styles = StyleSheet.create({
-//   // container: {
-//   //   flex: 1,
-//   //   backgroundColor: "#fff",
-//   //   alignItems: "center",
-//   //   justifyContent: "center",
-//   // },
-// });

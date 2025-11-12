@@ -18,6 +18,7 @@ import {
 } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_ENDPOINTS } from "../config/api";
+import { useLocale } from "../context/LocaleContext";
 import { MessageDto, UserSimple } from "../types/api";
 import {
   Frequency,
@@ -213,13 +214,14 @@ export default function RemindersScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const { t } = useLocale();
 
   const fetchMessages = useCallback(async () => {
     setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem("jwt");
       if (!token) {
-        Alert.alert("Session expired", "Please log in again.");
+        Alert.alert(t("home.alertNetworkTitle"), t("home.alertLoginBody"));
         (navigation as any).reset({ index: 0, routes: [{ name: "Login" }] });
         return;
       }
@@ -237,16 +239,19 @@ export default function RemindersScreen() {
         setMessages(list.map((msg) => toForm(msg)));
         setEditingId(null);
       } else if (response.status === 401) {
-        Alert.alert("Session expired", "Please log in again.");
+        Alert.alert(t("home.alertNetworkTitle"), t("home.alertLoginBody"));
         await AsyncStorage.removeItem("jwt");
         (navigation as any).reset({ index: 0, routes: [{ name: "Login" }] });
       } else if (response.status === 404) {
-        Alert.alert("Unavailable", "We could not load reminders for this user.");
+        Alert.alert(
+          t("home.alertNetworkTitle"),
+          t("reminders.readonlyEmpty")
+        );
       } else {
-        Alert.alert("Error", "Failed to fetch reminder list.");
+        Alert.alert(t("home.alertNetworkTitle"), t("home.alertNetworkBody"));
       }
     } catch (error) {
-      Alert.alert("Error", "Unable to reach the server. Please try again.");
+      Alert.alert(t("home.alertNetworkTitle"), t("home.alertNetworkBody"));
     } finally {
       setIsLoading(false);
     }
@@ -302,7 +307,7 @@ export default function RemindersScreen() {
     try {
       const token = await AsyncStorage.getItem("jwt");
       if (!token) {
-        Alert.alert("Session expired", "Please log in again.");
+        Alert.alert(t("home.alertNetworkTitle"), t("home.alertLoginBody"));
         return;
       }
 
@@ -330,18 +335,21 @@ export default function RemindersScreen() {
       });
 
       if (response.ok || response.status === 201) {
-        Alert.alert("Saved", "Reminders updated successfully.");
+        Alert.alert(
+          t("home.alertThankYouTitle"),
+          t("home.alertThankYouBody")
+        );
         fetchMessages();
       } else if (response.status === 400) {
         const data = await response.json().catch(() => ({}));
-        Alert.alert("Invalid data", data.message || "Please check your entries.");
+        Alert.alert(t("home.alertFailTitle"), data.message || t("home.alertFailBody"));
       } else if (response.status === 403) {
-        Alert.alert("Permission denied", "You can't edit reminders for this user.");
+        Alert.alert(t("home.alertNetworkTitle"), t("reminders.readonlySubtitle"));
       } else {
-        Alert.alert("Failed", "Unable to update reminders. Try again later.");
+        Alert.alert(t("home.alertFailTitle"), t("home.alertFailBody"));
       }
     } catch (error) {
-      Alert.alert("Error", "Network issue while saving reminders.");
+      Alert.alert(t("home.alertNetworkTitle"), t("home.alertNetworkBody"));
     } finally {
       setIsSaving(false);
     }
@@ -368,7 +376,7 @@ export default function RemindersScreen() {
       {sortedMessages.length === 0 ? (
         <View className="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-6 items-center">
           <Text className="text-body text-gray-600 text-center">
-            Your guardian has not scheduled reminders yet.
+            {t("reminders.readonlyEmpty")}
           </Text>
         </View>
       ) : (
@@ -392,7 +400,7 @@ export default function RemindersScreen() {
             {message.isOneTime && (
               <View className="mt-3 self-start bg-purple-100 px-3 py-1 rounded-full">
                 <Text className="text-purple-700 text-caption font-semibold">
-                  One-time reminder
+                  {t("reminders.oneTimeBadge")}
                 </Text>
               </View>
             )}
@@ -410,10 +418,10 @@ export default function RemindersScreen() {
       {messages.length === 0 && (
         <View className="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-6 items-center mb-4">
           <Text className="text-body text-gray-600 text-center">
-            No reminders yet.
+            {t("reminders.noReminders")}
           </Text>
           <Text className="text-body text-gray-500 text-center mt-2">
-            Tap the button below to add the first reminder.
+            {t("reminders.noRemindersAction")}
           </Text>
         </View>
       )}
@@ -428,10 +436,12 @@ export default function RemindersScreen() {
             {isEditing ? (
               <>
                 <Text className="text-body font-semibold text-gray-900 mb-3">
-                  Edit Reminder
+                  {t("reminders.editReminder")}
                 </Text>
 
-                <Text className="text-caption text-gray-500 mb-1">Message</Text>
+                <Text className="text-caption text-gray-500 mb-1">
+                  {t("reminders.messageLabel")}
+                </Text>
                 <TextInput
                   className="border border-gray-200 rounded-xl px-3 py-2 mb-3 bg-gray-50"
                   placeholder="Take medication"
@@ -442,7 +452,9 @@ export default function RemindersScreen() {
                   multiline
                 />
 
-                <Text className="text-caption text-gray-500 mb-2">Time</Text>
+                <Text className="text-caption text-gray-500 mb-2">
+                  {t("reminders.timeLabel")}
+                </Text>
                 <TimeWheelPicker
                   hour={message.hour}
                   minute={message.minute}
@@ -451,7 +463,7 @@ export default function RemindersScreen() {
 
                 <View className="mt-4">
                   <Text className="text-caption text-gray-500 mb-2">
-                    Frequency
+                    {t("reminders.frequencyLabel")}
                   </Text>
                   <View className="flex-row gap-2">
                     {(["DAILY", "WEEKLY"] as Frequency[]).map((freq) => (
@@ -473,7 +485,9 @@ export default function RemindersScreen() {
                               : "text-gray-700"
                           }`}
                         >
-                          {freq === "DAILY" ? "Every day" : "Select days"}
+                          {freq === "DAILY"
+                            ? t("reminders.frequencyDaily")
+                            : t("reminders.frequencyWeekly")}
                         </Text>
                       </Pressable>
                     ))}
@@ -482,9 +496,9 @@ export default function RemindersScreen() {
 
                 {message.frequency === "WEEKLY" && (
                   <View className="mt-3">
-                    <Text className="text-caption text-gray-500 mb-2">
-                      Days
-                    </Text>
+                  <Text className="text-caption text-gray-500 mb-2">
+                    {t("reminders.weekdaysLabel")}
+                  </Text>
                     <View className="flex-row flex-wrap gap-2">
                       {DAYS.map((label, index) => {
                         const selected = message.daysOfWeek.includes(index);
@@ -521,7 +535,7 @@ export default function RemindersScreen() {
 
                 <View className="flex-row items-center justify-between mt-4">
                   <Text className="text-body text-gray-700">
-                    One-time reminder
+                    {t("reminders.oneTimeLabel")}
                   </Text>
                   <Switch
                     value={message.isOneTime}
@@ -537,7 +551,7 @@ export default function RemindersScreen() {
                     onPress={() => setEditingId(null)}
                   >
                     <Text className="text-center text-gray-700 font-semibold">
-                      Done
+                      {t("reminders.done")}
                     </Text>
                   </Pressable>
                   <Pressable
@@ -545,7 +559,7 @@ export default function RemindersScreen() {
                     onPress={() => handleRemoveMessage(message.localId)}
                   >
                     <Text className="text-center text-red-600 font-semibold">
-                      Remove
+                      {t("reminders.remove")}
                     </Text>
                   </Pressable>
                 </View>
@@ -595,7 +609,9 @@ export default function RemindersScreen() {
         className="border border-dashed border-primary rounded-2xl py-4 items-center justify-center mb-4"
         onPress={handleAddMessage}
       >
-        <Text className="text-primary font-semibold">+ Add Reminder</Text>
+        <Text className="text-primary font-semibold">
+          {t("reminders.addButton")}
+        </Text>
       </Pressable>
     </ScrollView>
   );
@@ -609,7 +625,9 @@ export default function RemindersScreen() {
         >
           <Text className="text-gray-700 text-base font-semibold">← Back</Text>
         </Pressable>
-        <Text className="text-title font-bold text-gray-800">Reminders</Text>
+        <Text className="text-title font-bold text-gray-800">
+          {t("reminders.title")}
+        </Text>
         <View className="w-20" />
       </View>
 
@@ -620,11 +638,11 @@ export default function RemindersScreen() {
         <Text className="text-body text-gray-600">{headerSubtitle}</Text>
         {isReadonly ? (
           <Text className="text-caption text-gray-500 mt-2">
-            These reminders are maintained by your guardian.
+            {t("reminders.readonlySubtitle")}
           </Text>
         ) : (
           <Text className="text-caption text-gray-500 mt-2">
-            Set a time and frequency just like an alarm clock.
+            {t("reminders.editSubtitle")}
           </Text>
         )}
       </View>
@@ -632,7 +650,9 @@ export default function RemindersScreen() {
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#0F172A" />
-          <Text className="text-body text-gray-600 mt-3">Loading reminders...</Text>
+          <Text className="text-body text-gray-600 mt-3">
+            {t("reminders.loading")}
+          </Text>
         </View>
       ) : isReadonly ? (
         renderReadonlyList()
@@ -650,10 +670,15 @@ export default function RemindersScreen() {
             disabled={isSaving}
           >
             {isSaving ? (
-              <ActivityIndicator color="#fff" />
+              <View className="flex-row items-center justify-center gap-2">
+                <ActivityIndicator color="#fff" />
+                <Text className="text-subtitle text-white font-semibold text-center">
+                  {t("reminders.saveButtonSaving")}
+                </Text>
+              </View>
             ) : (
               <Text className="text-subtitle text-white font-semibold text-center">
-                Save Reminders
+                {t("reminders.saveButton")}
               </Text>
             )}
           </Pressable>

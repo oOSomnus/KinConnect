@@ -3,6 +3,7 @@ import { View, Text, Pressable, TextInput, Alert, ActivityIndicator, ScrollView 
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_ENDPOINTS } from "../config/api";
+import { useLocale } from "../context/LocaleContext";
 import { UserInfo, UserSimple } from "../types/api";
 
 export default function AddOldScreen() {
@@ -10,6 +11,7 @@ export default function AddOldScreen() {
   const [addEmail, setAddEmail] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const { t } = useLocale();
 
   const fetchUserInfo = useCallback(async () => {
     try {
@@ -120,19 +122,21 @@ export default function AddOldScreen() {
         >
           <Text className="text-gray-700 text-base font-semibold">← Back</Text>
         </Pressable>
-        <Text className="text-title font-bold text-gray-800">Elderly</Text>
+        <Text className="text-title font-bold text-gray-800">
+          {t("addOld.title")}
+        </Text>
         <View className="w-20" />
       </View>
 
       {/* Add Section */}
       <View className="px-4 mb-6">
         <Text className="text-subtitle font-semibold text-gray-800 mb-4">
-          Add Elderly by Email or ID
+          {t("addOld.subtitle")}
         </Text>
         <View className="flex-row gap-2">
           <TextInput
             className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-body bg-white"
-            placeholder="Enter email or user ID"
+            placeholder={t("addOld.placeholder")}
             placeholderTextColor="#9CA3AF"
             value={addEmail}
             onChangeText={setAddEmail}
@@ -149,7 +153,9 @@ export default function AddOldScreen() {
             {isAdding ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <Text className="text-white text-base font-semibold">Add</Text>
+              <Text className="text-white text-base font-semibold">
+                {t("addOld.addButton")}
+              </Text>
             )}
           </Pressable>
         </View>
@@ -158,22 +164,28 @@ export default function AddOldScreen() {
       {/* List of Elderly Users */}
       <View className="flex-1 px-4">
         <Text className="text-subtitle font-semibold text-gray-800 mb-4">
-          Associated Elderly Users
+          {t("addOld.listTitle")}
         </Text>
         <ScrollView>
           {userInfo && userInfo.olds.length > 0 ? (
             userInfo.olds.map((old) => (
               <View key={old.id} className="bg-white border border-gray-200 rounded-lg p-4 mb-3">
                 <View className="mb-2">
-                  <Text className="text-body text-gray-600">Username:</Text>
+                  <Text className="text-body text-gray-600">
+                    {t("addOld.usernameLabel")}:
+                  </Text>
                   <Text className="text-body font-semibold text-gray-800">{old.username}</Text>
                 </View>
                 <View className="mb-2">
-                  <Text className="text-body text-gray-600">Email:</Text>
+                  <Text className="text-body text-gray-600">
+                    {t("addOld.emailLabel")}:
+                  </Text>
                   <Text className="text-body font-semibold text-gray-800">{old.email}</Text>
                 </View>
                 <View>
-                  <Text className="text-body text-gray-600">ID:</Text>
+                  <Text className="text-body text-gray-600">
+                    {t("addOld.idLabel")}:
+                  </Text>
                   <Text className="text-body font-semibold text-gray-800">{old.id}</Text>
                 </View>
               </View>
@@ -181,10 +193,10 @@ export default function AddOldScreen() {
           ) : (
             <View className="bg-gray-50 border border-gray-200 rounded-lg p-6 items-center">
               <Text className="text-body text-gray-600 text-center">
-                No elderly users associated yet.
+                {t("addOld.emptyMessage")}
               </Text>
               <Text className="text-body text-gray-500 text-center mt-2">
-                Use the search box above to add elderly users.
+                {t("addOld.instructions")}
               </Text>
             </View>
           )}
