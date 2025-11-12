@@ -212,6 +212,7 @@ export default function RemindersScreen() {
   const [messages, setMessages] = useState<MessageForm[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const fetchMessages = useCallback(async () => {
     setIsLoading(true);
@@ -234,6 +235,7 @@ export default function RemindersScreen() {
         const data = await response.json();
         const list: MessageDto[] = data.data || [];
         setMessages(list.map((msg) => toForm(msg)));
+        setEditingId(null);
       } else if (response.status === 401) {
         Alert.alert("Session expired", "Please log in again.");
         await AsyncStorage.removeItem("jwt");
@@ -264,12 +266,17 @@ export default function RemindersScreen() {
 
   const handleAddMessage = () => {
     if (isReadonly) return;
-    setMessages((prev) => [...prev, createEmptyMessage()]);
+    const newMessage = createEmptyMessage();
+    setMessages((prev) => [...prev, newMessage]);
+    setEditingId(newMessage.localId);
   };
 
   const handleRemoveMessage = (localId: string) => {
     if (isReadonly) return;
     setMessages((prev) => prev.filter((msg) => msg.localId !== localId));
+    if (editingId === localId) {
+      setEditingId(null);
+    }
   };
 
   const handleSave = async () => {
@@ -411,109 +418,178 @@ export default function RemindersScreen() {
         </View>
       )}
 
-      {messages.map((message) => (
-        <View
-          key={message.localId}
-          className="bg-white border border-gray-200 rounded-2xl p-4 mb-4"
-        >
-          <Text className="text-body font-semibold text-gray-900 mb-3">
-            Reminder
-          </Text>
-
-          <Text className="text-caption text-gray-500 mb-1">Message</Text>
-          <TextInput
-            className="border border-gray-200 rounded-xl px-3 py-2 mb-3 bg-gray-50"
-            placeholder="Take medication"
-            value={message.text}
-            onChangeText={(value) => updateMessage(message.localId, { text: value })}
-            multiline
-          />
-
-          <Text className="text-caption text-gray-500 mb-2">Time</Text>
-          <TimeWheelPicker
-            hour={message.hour}
-            minute={message.minute}
-            onChange={(val) => updateMessage(message.localId, val)}
-          />
-
-          <View className="mt-4">
-            <Text className="text-caption text-gray-500 mb-2">Frequency</Text>
-            <View className="flex-row gap-2">
-              {(["DAILY", "WEEKLY"] as Frequency[]).map((freq) => (
-                <Pressable
-                  key={freq}
-                  className={`flex-1 py-3 rounded-2xl border ${
-                    message.frequency === freq
-                      ? "bg-primary border-primary"
-                      : "bg-gray-100 border-gray-200"
-                  }`}
-                  onPress={() => updateMessage(message.localId, { frequency: freq })}
-                >
-                  <Text
-                    className={`text-center font-semibold ${
-                      message.frequency === freq ? "text-white" : "text-gray-700"
-                    }`}
-                  >
-                    {freq === "DAILY" ? "Every day" : "Select days"}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-
-          {message.frequency === "WEEKLY" && (
-            <View className="mt-3">
-              <Text className="text-caption text-gray-500 mb-2">Days</Text>
-              <View className="flex-row flex-wrap gap-2">
-                {DAYS.map((label, index) => {
-                  const selected = message.daysOfWeek.includes(index);
-                  return (
-                    <Pressable
-                      key={label}
-                      className={`px-3 py-2 rounded-xl border ${
-                        selected
-                          ? "bg-secondary border-secondary"
-                          : "bg-gray-100 border-gray-200"
-                      }`}
-                      onPress={() => {
-                        const nextDays = selected
-                          ? message.daysOfWeek.filter((d) => d !== index)
-                          : [...message.daysOfWeek, index];
-                        updateMessage(message.localId, { daysOfWeek: nextDays });
-                      }}
-                    >
-                      <Text
-                        className={`text-sm font-semibold ${
-                          selected ? "text-white" : "text-gray-700"
-                        }`}
-                      >
-                        {label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-          )}
-
-          <View className="flex-row items-center justify-between mt-4">
-            <Text className="text-body text-gray-700">One-time reminder</Text>
-            <Switch
-              value={message.isOneTime}
-              onValueChange={(value) =>
-                updateMessage(message.localId, { isOneTime: value })
-              }
-            />
-          </View>
-
-          <Pressable
-            className="bg-red-50 border border-red-200 rounded-xl py-2 mt-4"
-            onPress={() => handleRemoveMessage(message.localId)}
+      {messages.map((message) => {
+        const isEditing = editingId === message.localId;
+        return (
+          <View
+            key={message.localId}
+            className="bg-white border border-gray-200 rounded-2xl p-4 mb-4"
           >
-            <Text className="text-center text-red-600 font-semibold">Remove</Text>
-          </Pressable>
-        </View>
-      ))}
+            {isEditing ? (
+              <>
+                <Text className="text-body font-semibold text-gray-900 mb-3">
+                  Edit Reminder
+                </Text>
+
+                <Text className="text-caption text-gray-500 mb-1">Message</Text>
+                <TextInput
+                  className="border border-gray-200 rounded-xl px-3 py-2 mb-3 bg-gray-50"
+                  placeholder="Take medication"
+                  value={message.text}
+                  onChangeText={(value) =>
+                    updateMessage(message.localId, { text: value })
+                  }
+                  multiline
+                />
+
+                <Text className="text-caption text-gray-500 mb-2">Time</Text>
+                <TimeWheelPicker
+                  hour={message.hour}
+                  minute={message.minute}
+                  onChange={(val) => updateMessage(message.localId, val)}
+                />
+
+                <View className="mt-4">
+                  <Text className="text-caption text-gray-500 mb-2">
+                    Frequency
+                  </Text>
+                  <View className="flex-row gap-2">
+                    {(["DAILY", "WEEKLY"] as Frequency[]).map((freq) => (
+                      <Pressable
+                        key={freq}
+                        className={`flex-1 py-3 rounded-2xl border ${
+                          message.frequency === freq
+                            ? "bg-primary border-primary"
+                            : "bg-gray-100 border-gray-200"
+                        }`}
+                        onPress={() =>
+                          updateMessage(message.localId, { frequency: freq })
+                        }
+                      >
+                        <Text
+                          className={`text-center font-semibold ${
+                            message.frequency === freq
+                              ? "text-white"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {freq === "DAILY" ? "Every day" : "Select days"}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+
+                {message.frequency === "WEEKLY" && (
+                  <View className="mt-3">
+                    <Text className="text-caption text-gray-500 mb-2">
+                      Days
+                    </Text>
+                    <View className="flex-row flex-wrap gap-2">
+                      {DAYS.map((label, index) => {
+                        const selected = message.daysOfWeek.includes(index);
+                        return (
+                          <Pressable
+                            key={label}
+                            className={`px-3 py-2 rounded-xl border ${
+                              selected
+                                ? "bg-secondary border-secondary"
+                                : "bg-gray-100 border-gray-200"
+                            }`}
+                            onPress={() => {
+                              const nextDays = selected
+                                ? message.daysOfWeek.filter((d) => d !== index)
+                                : [...message.daysOfWeek, index];
+                              updateMessage(message.localId, {
+                                daysOfWeek: nextDays,
+                              });
+                            }}
+                          >
+                            <Text
+                              className={`text-sm font-semibold ${
+                                selected ? "text-white" : "text-gray-700"
+                              }`}
+                            >
+                              {label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+                )}
+
+                <View className="flex-row items-center justify-between mt-4">
+                  <Text className="text-body text-gray-700">
+                    One-time reminder
+                  </Text>
+                  <Switch
+                    value={message.isOneTime}
+                    onValueChange={(value) =>
+                      updateMessage(message.localId, { isOneTime: value })
+                    }
+                  />
+                </View>
+
+                <View className="mt-4 flex-row gap-2">
+                  <Pressable
+                    className="flex-1 bg-gray-100 border border-gray-200 rounded-xl py-2"
+                    onPress={() => setEditingId(null)}
+                  >
+                    <Text className="text-center text-gray-700 font-semibold">
+                      Done
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    className="flex-1 bg-red-50 border border-red-200 rounded-xl py-2"
+                    onPress={() => handleRemoveMessage(message.localId)}
+                  >
+                    <Text className="text-center text-red-600 font-semibold">
+                      Remove
+                    </Text>
+                  </Pressable>
+                </View>
+              </>
+            ) : (
+              <>
+                <View className="flex-row justify-between items-start mb-2">
+                  <View>
+                    <Text className="text-title font-semibold text-gray-900">
+                      {pad(message.hour)}:{pad(message.minute)}
+                    </Text>
+                    <Text className="text-caption text-gray-500">
+                      {describeSchedule({
+                        hour: message.hour,
+                        minute: message.minute,
+                        frequency: message.frequency,
+                        daysOfWeek: message.daysOfWeek,
+                      })}
+                    </Text>
+                  </View>
+                  <Pressable
+                    className="bg-gray-100 px-3 py-1 rounded-full"
+                    onPress={() => setEditingId(message.localId)}
+                  >
+                    <Text className="text-sm font-semibold text-gray-700">
+                      Edit
+                    </Text>
+                  </Pressable>
+                </View>
+                <Text className="text-body text-gray-800 mb-2">
+                  {message.text}
+                </Text>
+                {message.isOneTime && (
+                  <View className="bg-purple-100 self-start px-3 py-1 rounded-full mb-2">
+                    <Text className="text-purple-700 text-caption font-semibold">
+                      One-time reminder
+                    </Text>
+                  </View>
+                )}
+              </>
+            )}
+          </View>
+        );
+      })}
 
       <Pressable
         className="border border-dashed border-primary rounded-2xl py-4 items-center justify-center mb-4"
