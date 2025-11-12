@@ -68,8 +68,8 @@ export default function HomeScreen({ navigation }: any) {
     });
   };
 
-  const navigateToReminders = (oldUser: UserSimple) => {
-    navigation.navigate("Reminders", { oldUser });
+  const navigateToReminders = (oldUser: UserSimple, readonly = false) => {
+    navigation.navigate("Reminders", { oldUser, readonly });
   };
 
   const renderGuardianView = () => (
@@ -125,6 +125,25 @@ export default function HomeScreen({ navigation }: any) {
         }
       >
         <Text className="text-title text-white font-bold">I'm OK</Text>
+      </Pressable>
+
+      <Pressable
+        className="bg-primary w-4/5 py-4 rounded-2xl mt-6"
+        onPress={() =>
+          userInfo &&
+          navigateToReminders(
+            {
+              id: userInfo.id,
+              username: userInfo.username,
+              email: userInfo.email,
+            },
+            true
+          )
+        }
+      >
+        <Text className="text-subtitle text-white font-semibold text-center">
+          View My Reminders
+        </Text>
       </Pressable>
 
       {userInfo?.guardian && (

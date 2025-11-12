@@ -33,7 +33,9 @@ public class MsgController {
         if (currentUserInfo == null) {
             throw new AppException(400, "current userinfo is null", "user not logged in");
         }
-        if (Boolean.FALSE.equals(userService.verifyRelation(oldId, currentUserInfo.id()))) {
+        boolean isSelf = oldId.equals(currentUserInfo.id());
+        boolean hasGuardianAccess = isSelf || userService.verifyRelation(oldId, currentUserInfo.id());
+        if (!hasGuardianAccess) {
             throw new AppException(400, "relation verification failed", "user not logged in");
         }
         List<Message> messages = messageService.getAllMessages(oldId);

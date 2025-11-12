@@ -16,6 +16,7 @@ import { MessageDto, UserSimple } from "../types/api";
 
 type RouteParams = {
   oldUser: UserSimple;
+  readonly?: boolean;
 };
 
 type MessageForm = MessageDto & { localId: string };
@@ -31,7 +32,8 @@ const createEmptyMessage = (): MessageForm => ({
 export default function RemindersScreen() {
   const route = useRoute();
   const navigation = useNavigation();
-  const { oldUser } = route.params as RouteParams;
+  const { oldUser, readonly } = route.params as RouteParams;
+  const isReadonly = Boolean(readonly);
 
   const [messages, setMessages] = useState<MessageForm[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,14 +94,20 @@ export default function RemindersScreen() {
   };
 
   const handleAddMessage = () => {
+    if (isReadonly) return;
     setMessages((prev) => [...prev, createEmptyMessage()]);
   };
 
   const handleRemoveMessage = (localId: string) => {
+    if (isReadonly) return;
     setMessages((prev) => prev.filter((msg) => msg.localId !== localId));
   };
 
   const handleSave = async () => {
+    if (isReadonly) {
+      return;
+    }
+
     if (!messages.length) {
       Alert.alert("Nothing to save", "Please add at least one reminder.");
       return;
@@ -181,9 +189,15 @@ export default function RemindersScreen() {
           {oldUser.username}
         </Text>
         <Text className="text-body text-gray-600">{headerSubtitle}</Text>
-        <Text className="text-caption text-gray-500 mt-2">
-          Use cron format (e.g., "0 0 9 * * ?") to schedule reminders.
-        </Text>
+        {isReadonly ? (
+          <Text className="text-caption text-gray-500 mt-2">
+            These reminders are maintained by your guardian.
+          </Text>
+        ) : (
+          <Text className="text-caption text-gray-500 mt-2">
+            Use cron format (e.g., "0 0 9 * * ?") to schedule reminders.
+          </Text>
+        )}
       </View>
 
       {isLoading ? (
@@ -207,8 +221,11 @@ export default function RemindersScreen() {
                 className="border border-gray-200 rounded-xl px-3 py-2 mb-3 bg-gray-50"
                 placeholder="Take medication"
                 value={message.text}
-                onChangeText={(value) => updateMessage(message.localId, { text: value })}
+                onChangeText={(value) =>
+                  updateMessage(message.localId, { text: value })
+                }
                 multiline
+                editable={!isReadonly}
               />
 
               <Text className="text-caption text-gray-500 mb-1">Cron schedule</Text>
@@ -219,6 +236,7 @@ export default function RemindersScreen() {
                 onChangeText={(value) =>
                   updateMessage(message.localId, { execTime: value })
                 }
+                editable={!isReadonly}
               />
 
               <View className="flex-row items-center justify-between mb-3">
@@ -228,46 +246,66 @@ export default function RemindersScreen() {
                   onValueChange={(value) =>
                     updateMessage(message.localId, { isOneTime: value })
                   }
+                  disabled={isReadonly}
                 />
               </View>
 
-              <Pressable
-                className="bg-red-50 border border-red-200 rounded-xl py-2"
-                onPress={() => handleRemoveMessage(message.localId)}
-              >
-                <Text className="text-center text-red-600 font-semibold">
-                  Remove
-                </Text>
-              </Pressable>
+              {!isReadonly && (
+                <Pressable
+                  className="bg-red-50 border border-red-200 rounded-xl py-2"
+                  onPress={() => handleRemoveMessage(message.localId)}
+                >
+                  <Text className="text-center text-red-600 font-semibold">
+                    Remove
+                  </Text>
+                </Pressable>
+              )}
             </View>
           ))}
 
-          <Pressable
-            className="border border-dashed border-primary rounded-2xl py-4 items-center justify-center mb-4"
-            onPress={handleAddMessage}
-          >
-            <Text className="text-primary font-semibold">+ Add Reminder</Text>
-          </Pressable>
+          {messages.length === 0 && (
+            <View className="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-6 items-center mb-4">
+              <Text className="text-body text-gray-600 text-center">
+                No reminders yet.
+              </Text>
+              {!isReadonly && (
+                <Text className="text-body text-gray-500 text-center mt-2">
+                  Tap the button below to add the first reminder.
+                </Text>
+              )}
+            </View>
+          )}
+
+          {!isReadonly && (
+            <Pressable
+              className="border border-dashed border-primary rounded-2xl py-4 items-center justify-center mb-4"
+              onPress={handleAddMessage}
+            >
+              <Text className="text-primary font-semibold">+ Add Reminder</Text>
+            </Pressable>
+          )}
         </ScrollView>
       )}
 
-      <View className="px-4 pb-8">
-        <Pressable
-          className={`w-full py-4 rounded-xl ${
-            isSaving ? "bg-gray-400" : "bg-primary"
-          }`}
-          onPress={handleSave}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text className="text-subtitle text-white font-semibold text-center">
-              Save Reminders
-            </Text>
-          )}
-        </Pressable>
-      </View>
+      {!isReadonly && (
+        <View className="px-4 pb-8">
+          <Pressable
+            className={`w-full py-4 rounded-xl ${
+              isSaving ? "bg-gray-400" : "bg-primary"
+            }`}
+            onPress={handleSave}
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text className="text-subtitle text-white font-semibold text-center">
+                Save Reminders
+              </Text>
+            )}
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }

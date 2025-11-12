@@ -45,6 +45,7 @@ public class MsgControllerIntegrationTest {
     private String guardianJwtToken;
     private Long guardianId;
     private Long oldUserId;
+    private String oldUserJwtToken;
 
     @BeforeEach
     void setUp() {
@@ -65,6 +66,8 @@ public class MsgControllerIntegrationTest {
         String oldPassword = "Password123!";
         
         registerVerifyAndLogin(oldUserEmail, oldUsername, oldPassword);
+        Map<String, Object> oldLogin = (Map<String, Object>) getLoginResponse(oldUserEmail, oldPassword).getBody().getData();
+        this.oldUserJwtToken = (String) oldLogin.get("token");
         
         // Mark the user as "old" (elder)
         User oldUser = userRepository.findByEmail(oldUserEmail);
@@ -182,6 +185,26 @@ public class MsgControllerIntegrationTest {
         
         // Unrelated guardian should not be able to access messages
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void getMessage_asOldUser_shouldReturn200() {
+        String url = "http://localhost:" + port + "/messages/" + oldUserId;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(oldUserJwtToken);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        ResponseEntity<Response> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                Response.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getCode()).isEqualTo(200);
     }
 
     @Test
